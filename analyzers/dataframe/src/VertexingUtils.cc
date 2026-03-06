@@ -1471,6 +1471,36 @@ get_invM_V0(ROOT::VecOps::RVec<double> invM, ROOT::VecOps::RVec<int> nSV_jet) {
   return result;
 }
 
+sel_pt_tracks::sel_pt_tracks(float arg_min_pt) : m_min_pt(arg_min_pt) {};
+ROOT::VecOps::RVec<edm4hep::TrackState> sel_pt_tracks::operator() (ROOT::VecOps::RVec<edm4hep::TrackState> in) {
+    ROOT::VecOps::RVec<edm4hep::TrackState> result;
+    result.reserve(in.size());
+    for (size_t i = 0; i < in.size(); ++i) {
+        auto & track = in[i];
+        TVectorD track_param = FCCAnalyses::VertexingUtils::get_trackParam(track);  //track parameters in edm4hep format
+        TVector3 tracks_p = FCCAnalyses::VertexingUtils::ParToP(track_param);   //get the momentum of the tracks from the track_parameters
+        double tracks_pt = tracks_p.Pt();   //Pt: the transverse component
+        if (tracks_pt > m_min_pt) {
+            result.emplace_back(track);
+        }
+    }
+    return result;
+}
+
+sel_d0_tracks::sel_d0_tracks(float arg_min_d0) : m_min_d0(arg_min_d0) {};
+ROOT::VecOps::RVec<edm4hep::TrackState> sel_d0_tracks::operator() (ROOT::VecOps::RVec<edm4hep::TrackState> in) {
+    ROOT::VecOps::RVec<edm4hep::TrackState> result;
+    result.reserve(in.size());
+    for (size_t i = 0; i < in.size(); ++i) {
+        auto & track = in[i];
+        double tr_d0 = fabs(track.D0);
+        if (tr_d0 > m_min_d0) {
+            result.emplace_back(track);
+        }
+    }
+    return result;
+}
+
 } // namespace VertexingUtils
 
 } // namespace FCCAnalyses

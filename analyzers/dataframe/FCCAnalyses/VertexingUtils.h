@@ -316,6 +316,18 @@ namespace VertexingUtils{
   TMatrixDSym CovToACTS(TMatrixDSym Cov,TVectorD Par);
 
 
+  /// selection of tracks based on the impact paramter d0
+struct sel_d0_tracks {
+  sel_d0_tracks(float arg_min_d0);
+  float m_min_d0 = 0;
+  ROOT::VecOps::RVec<edm4hep::TrackState> operator() (ROOT::VecOps::RVec<edm4hep::TrackState> in);
+};
+  
+struct sel_pt_tracks {
+    sel_pt_tracks(float arg_min_pt);
+    float m_min_pt = 0;
+    ROOT::VecOps::RVec<edm4hep::TrackState> operator() (ROOT::VecOps::RVec<edm4hep::TrackState> in);
+  };
 
 }//end NS VertexingUtils
 
