@@ -328,7 +328,7 @@ def runPlots(config: dict[str, Any],
         leg2.SetTextFont(42)
     else:
         legsize = 0.04 * (len(hbackgrounds) + len(hsignal))
-        leg = ROOT.TLegend(0.68, 0.86 - legsize, 0.96, 0.88)
+        leg = ROOT.TLegend(0.6, 0.87 - legsize, 0.7, 0.89) 
         leg2 = None
 
         if config['leg_position'][0] is not None:
@@ -345,7 +345,7 @@ def runPlots(config: dict[str, Any],
     leg.SetLineColor(0)
     leg.SetShadowColor(10)
     leg.SetTextSize(config['legend_text_size'])
-    leg.SetTextFont(42)
+    leg.SetTextFont(35)
 
     for b in hbackgrounds:
         if config['split_leg']:
@@ -379,12 +379,12 @@ def runPlots(config: dict[str, Any],
         histos.append(hbackgrounds[bkg][0])
         colors.append(script_module.colors[bkg])
 
-    lt = 'FCCAnalyses: FCC-hh Simulation (Delphes)'
+    lt = 'FCCAnalyses: FCC-hh Simulation'
     rt = f'#sqrt{{s}} = {script_module.energy:.1f} TeV,   ' \
          f'{config["int_lumi_label"]}'
 
     if 'ee' in script_module.collider:
-        lt = 'FCCAnalyses: FCC-ee Simulation (Delphes)'
+        lt = 'FCCAnalyses: FCC-ee Simulation'
         rt = f'#sqrt{{s}} = {script_module.energy:.1f} GeV,   ' \
              f'{config["int_lumi_label"]}'
 
@@ -620,7 +620,7 @@ def draw_plot(config: dict[str, Any],
         return
 
     # Setup canvas
-    canvas = ROOT.TCanvas(plot_name, plot_name, 800, 800)
+    canvas = ROOT.TCanvas(plot_name, plot_name, 1000, 800)
     if plot_params['xaxis'] == 'lin':
         canvas.SetLogx(0)
     else:
@@ -630,8 +630,8 @@ def draw_plot(config: dict[str, Any],
     else:
         canvas.SetLogy(1)
     canvas.SetTicks(1, 1)
-    canvas.SetLeftMargin(0.14)
-    canvas.SetRightMargin(0.08)
+    canvas.SetLeftMargin(0.20)
+    canvas.SetRightMargin(0.1)
 
     # Adjust y-axis label
     hist0_name = str(histos[0].GetXaxis().GetTitle())
