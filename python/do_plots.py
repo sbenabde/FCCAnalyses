@@ -347,13 +347,15 @@ def runPlots(config: dict[str, Any],
     leg.SetTextSize(config['legend_text_size'])
     leg.SetTextFont(42)
 
+    for s in hsignal:
+        leg.AddEntry(hsignal[s][0], script_module.legend[s], "l")
+
     for b in hbackgrounds:
         if config['split_leg']:
             leg2.AddEntry(hbackgrounds[b][0], script_module.legend[b], "f")
         else:
             leg.AddEntry(hbackgrounds[b][0], script_module.legend[b], "f")
-    for s in hsignal:
-        leg.AddEntry(hsignal[s][0], script_module.legend[s], "l")
+
 
     yields = {}
     for s in hsignal:
@@ -497,13 +499,15 @@ def runPlotsHistmaker(config: dict[str, Any],
     leg.SetTextSize(config['legend_text_size'])
     leg.SetTextFont(42)
 
+    for s in hsignal:
+        leg.AddEntry(hsignal[s][0], param.legend[s], "l")
+        
     for b in hbackgrounds:
         if splitLeg:
             leg2.AddEntry(hbackgrounds[b][0], param.legend[b], "f")
         else:
             leg.AddEntry(hbackgrounds[b][0], param.legend[b], "f")
-    for s in hsignal:
-        leg.AddEntry(hsignal[s][0], param.legend[s], "l")
+
 
     yields = {}
     for s in hsignal:
