@@ -1,13 +1,13 @@
 import ROOT
 
 # global parameters
-intLumi        = 10.8e+06 #in pb-1
+intLumi = 10.8e+06 #in pb-1
 
 ###If scaleSig=0 or scaleBack=0, we don't apply any additional scaling, on top of the normalization to cross section and integrated luminosity, as defined in finalSel.py
 ###If scaleSig or scaleBack is not defined, plots will be normalized to 1
 # scaleSig       = 0.
 # scaleBack      = 0.
-ana_tex        = 'e^{+}e^{-} #rightarrow Zh, Z #rightarrow qq, h #rightarrow ZdZd, Zd #rightarrow #mu #mu'
+ana_tex        = 'e^{+}e^{-} #rightarrow Zh, Z #rightarrow qq, h #rightarrow Z_{d} Z_{d}, Z_{d} #rightarrow #mu^{+} #mu^{-}'
 delphesVersion = '3.4.2'
 energy         = 240
 collider       = 'FCC-ee'
@@ -97,9 +97,9 @@ plots['DarkPhotons'] = {
             }
 
 legend = {}
-legend['dark_photons_mZd360MeV_e_1e-5'] = r'360MeV, 1\times10^{-5}'
-legend['dark_photons_mZd1100MeV_e_3.12e-6'] = r'1100MeV, 3.12\times10^{-6}'
-legend['dark_photons_mZd7000MeV_e_2.7e-7'] = r'7000MeV, 2.7\times10^{-7}'
+legend['dark_photons_mZd360MeV_e_1e-5'] = '360MeV, 1#times10^{-5}'
+legend['dark_photons_mZd1100MeV_e_3.12e-6'] = '1100MeV, 3.12#times10^{-6}'
+legend['dark_photons_mZd7000MeV_e_2.7e-7'] = '7000MeV, 2.7#times10^{-7}'
 # legend['wzp6_ee_ccH_Hmumu_ecm240'] = r'Z_cc, H_mumu'
 # legend['wzp6_ee_mumuH_Hbb_ecm240'] = r'Z_mumu, H_bb'
 # legend['mgp8_ee_zh_ecm240'] = r'ZH'

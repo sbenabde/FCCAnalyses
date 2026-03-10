@@ -328,7 +328,7 @@ def runPlots(config: dict[str, Any],
         leg2.SetTextFont(42)
     else:
         legsize = 0.04 * (len(hbackgrounds) + len(hsignal))
-        leg = ROOT.TLegend(0.6, 0.87 - legsize, 0.7, 0.89) 
+        leg = ROOT.TLegend(0.65, 0.86 - legsize, 0.75, 0.88) #Position labels samples
         leg2 = None
 
         if config['leg_position'][0] is not None:
@@ -345,7 +345,7 @@ def runPlots(config: dict[str, Any],
     leg.SetLineColor(0)
     leg.SetShadowColor(10)
     leg.SetTextSize(config['legend_text_size'])
-    leg.SetTextFont(35)
+    leg.SetTextFont(42)
 
     for b in hbackgrounds:
         if config['split_leg']:
@@ -380,12 +380,12 @@ def runPlots(config: dict[str, Any],
         colors.append(script_module.colors[bkg])
 
     lt = 'FCCAnalyses: FCC-hh Simulation'
-    rt = f'#sqrt{{s}} = {script_module.energy:.1f} TeV,   ' \
+    rt = f'#sqrt{{s}} = {script_module.energy:.0f} TeV,   ' \
          f'{config["int_lumi_label"]}'
 
     if 'ee' in script_module.collider:
-        lt = 'FCCAnalyses: FCC-ee Simulation'
-        rt = f'#sqrt{{s}} = {script_module.energy:.1f} GeV,   ' \
+        lt = "#bf{FCC-ee} Simulation"
+        rt = f'#sqrt{{s}} = {script_module.energy:.0f} GeV,   ' \
              f'{config["int_lumi_label"]}'
 
     customLabel = ""
@@ -400,7 +400,7 @@ def runPlots(config: dict[str, Any],
                        'stack-sig': 'stack'}
         draw_plot(config, plot_params,
                   var,
-                  'events', leg, lt, rt,
+                  'Events', leg, lt, rt,
                   script_module.formats,
                   script_module.outdir + "/" + sel, histos,
                   colors, script_module.ana_tex, extralab,
@@ -423,7 +423,7 @@ def runPlots(config: dict[str, Any],
                     plot_name += '_' + yaxis_scaling + 'y'
                 draw_plot(config, plot_params_x_y,
                           plot_name,
-                          'events', leg, lt, rt,
+                          'Events', leg, lt, rt,
                           script_module.formats,
                           script_module.outdir + "/" + sel,
                           histos, colors, script_module.ana_tex,
@@ -540,7 +540,8 @@ def runPlotsHistmaker(config: dict[str, Any],
     logy = hist_cfg['logy'] if 'logy' in hist_cfg else False
     extralab = hist_cfg['extralab'] if 'extralab' in hist_cfg else ""
 
-    intLumi = f'L = {param.intLumi / 1e+06:.0f} ab^{{-1}}'
+
+    intLumi = f'L = {param.intLumi / 1e+06:.1f} ab^{{-1}}'
     if hasattr(param, "intLumiLabel"):
         intLumi = getattr(param, "intLumiLabel")
 
@@ -548,7 +549,7 @@ def runPlotsHistmaker(config: dict[str, Any],
     rt = f'#sqrt{{s}} = {param.energy:.1f} TeV,   L = {intLumi}'
 
     if 'ee' in param.collider:
-        lt = 'FCCAnalyses: FCC-ee Simulation (Delphes)'
+        lt = "FCC-ee #bf{Simulation}"
         rt = f'#sqrt{{s}} = {param.energy:.1f} GeV,   {intLumi}'
 
     customLabel = ""
@@ -630,8 +631,8 @@ def draw_plot(config: dict[str, Any],
     else:
         canvas.SetLogy(1)
     canvas.SetTicks(1, 1)
-    canvas.SetLeftMargin(0.20)
-    canvas.SetRightMargin(0.1)
+    canvas.SetLeftMargin(0.12)
+    canvas.SetRightMargin(0.05)
 
     # Adjust y-axis label
     hist0_name = str(histos[0].GetXaxis().GetTitle())
@@ -651,7 +652,7 @@ def draw_plot(config: dict[str, Any],
     if nbins == 1:
         h_dummy.GetXaxis().SetTitle(
             histos[0].GetXaxis().GetTitle() if xtitle == "" else xtitle)
-        h_dummy.GetYaxis().SetTitleOffset(1.95)
+        h_dummy.GetYaxis().SetTitleOffset(1.5)
         h_dummy.GetXaxis().SetTitleOffset(
             1.2*h_dummy.GetXaxis().GetTitleOffset())
     else:  # for cutflow plots
@@ -672,7 +673,7 @@ def draw_plot(config: dict[str, Any],
     # first plot backgrounds (sorted by the yields)
     for i in range(nsig, nsig+nbkg):
         hist = histos[i]
-        hist.SetLineWidth(1)
+        hist.SetLineWidth(0)
         hist.SetLineColor(ROOT.kBlack)
         hist.SetFillColor(colors[i])
         if hist.Integral() > 0:
@@ -752,7 +753,7 @@ def draw_plot(config: dict[str, Any],
     if ymin == -1:
         ymin = ymin_*0.1 if plot_params['yaxis'] == 'log' else 0
     if ymax == -1:
-        ymax = ymax_*1000. if plot_params['yaxis'] == 'log' else 1.4*ymax_
+        ymax = ymax_*100. if plot_params['yaxis'] == 'log' else 1*ymax_
     if plot_params['yaxis'] == 'log':
         if ymin <= 0.:
             LOGGER.error('Log scale for y-axis can\'t start at: %g\n'
@@ -769,40 +770,46 @@ def draw_plot(config: dict[str, Any],
     if legend2 is not None:
         legend2.Draw()
 
+    #Main title
     latex = ROOT.TLatex()
     latex.SetNDC()
     latex.SetTextAlign(31)
-    latex.SetTextSize(0.04)
+    latex.SetTextSize(0.045)
 
-    text = '#it{' + leftText + '}'
-    latex.DrawLatex(0.90, 0.94, text)
+    text = '#bf{#it{' + leftText + '}}'
+    latex.DrawLatex(0.389, 0.91, text)
 
-    text = '#it{'+customLabel+'}'
-    latex.SetTextAlign(12)
-    latex.SetNDC(ROOT.kTRUE)
-    latex.SetTextSize(0.04)
-    latex.DrawLatex(0.18, 0.85, text)
+    #Legend with luminosity (rightext[0]), Energy (rightext[1])
+    # text = '#bf{'+customLabel+'}'
+    # latex.SetTextAlign(12)
+    # latex.SetNDC(ROOT.kTRUE)
+    # latex.SetTextSize(0.04)
+    # latex.DrawLatex(0.18, 0.87, text)
 
+    #Energy
     rightText = re.split(",", rightText)
-    text = '#bf{#it{' + rightText[0] + '}}'
+    text = '#bf{' + rightText[0] + '}'
 
     latex.SetTextAlign(12)
     latex.SetNDC(ROOT.kTRUE)
-    latex.SetTextSize(0.04)
-    latex.DrawLatex(0.18, 0.81, text)
-
-    rightText[1] = rightText[1].replace("   ", "")
-    text = '#bf{#it{' + rightText[1] + '}}'
     latex.SetTextSize(0.035)
-    latex.DrawLatex(0.18, 0.76, text)
+    latex.DrawLatex(0.41, 0.925, text)
 
-    text = '#bf{#it{' + ana_tex + '}}'
-    latex.SetTextSize(0.04)
-    latex.DrawLatex(0.18, 0.71, text)
+    #Luminosity
+    rightText[1] = rightText[1].replace("   ", "")
+    text = '#bf{' + rightText[1] + '}'
+    latex.SetTextSize(0.035)
+    latex.DrawLatex(0.81, 0.925, text)
 
+    #Process
+    text = '#bf{' + ana_tex + '}'
+    latex.SetTextSize(0.035)
+    latex.DrawLatex(0.155, 0.85, text)
+
+    #Selection (cuts)
     text = '#bf{#it{' + extralab + '}}'
     latex.SetTextSize(0.025)
-    latex.DrawLatex(0.18, 0.66, text)
+    latex.DrawLatex(0.155, 0.82, text)
 
     if config['scale_sig'] != 1.0:
         text = '#bf{#it{Signal Scaling = ' + f'{config["scale_sig"]:.3g}' + \
@@ -835,7 +842,7 @@ def draw_plot(config: dict[str, Any],
         latex.SetTextAlign(31)
         latex.SetTextSize(0.04)
 
-        text = '#it{' + leftText + '}'
+        text = leftText
         latex.DrawLatex(0.90, 0.92, text)
 
         text = '#bf{#it{' + rightText[0] + '}}'
@@ -973,8 +980,8 @@ def run(args):
     if hasattr(script_module, 'intLumi'):
         config['int_lumi'] = script_module.intLumi
     else:
-        LOGGER.debug('No integrated luminosity provided, using 1.0 pb-1.')
-    LOGGER.info('Integrated luminosity: %g pb-1', config['int_lumi'])
+        LOGGER.debug('No integrated luminosity provided, using 1.0 ab-1.')
+    LOGGER.info('Integrated luminosity: %g ab-1', config['int_lumi'])
 
     # Whether to scale histograms to luminosity
     config['do_scale'] = 1.0
@@ -1084,7 +1091,7 @@ def run(args):
     if hasattr(script_module, 'plotStatUnc'):
         config['plot_stat_unc'] = script_module.plotStatUnc
 
-    config['legend_text_size'] = 0.035
+    config['legend_text_size'] = 0.037
     if hasattr(script_module, 'legendTextSize'):
         config['legend_text_size'] = script_module.legendTextSize
     if args.legend_text_size is not None:
@@ -1097,13 +1104,13 @@ def run(args):
     if config['int_lumi_label'] is None:
         if config['int_lumi'] >= 1e6:
             int_lumi_label = config['int_lumi'] / 1e6
-            config['int_lumi_label'] = f'L = {int_lumi_label:.2g} ab^{{-1}}'
+            config['int_lumi_label'] = f'L = {int_lumi_label:.3g} ab^{{-1}}'
         elif config['int_lumi'] >= 1e3:
             int_lumi_label = config['int_lumi'] / 1e3
-            config['int_lumi_label'] = f'L = {int_lumi_label:.2g} fb^{{-1}}'
+            config['int_lumi_label'] = f'L = {int_lumi_label:.3g} fb^{{-1}}'
         else:
             config['int_lumi_label'] = \
-                f'L = {config["int_lumi"]:.2g} pb^{{-1}}'
+                f'L = {config["int_lumi"]:.3g} pb^{{-1}}'
 
     # Handle plots for the Histmaker analyses and exit
     if config['ana_type'] == 'histmaker':
