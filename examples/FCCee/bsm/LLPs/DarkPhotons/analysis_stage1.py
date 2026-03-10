@@ -92,11 +92,11 @@ class Analysis():
 
         self.process_list = {
             'dark_photons_mZd360MeV_e_1e-5':{},
-            #'dark_photons_mZd1100MeV_e_3.12e-6':{},
-            #'dark_photons_mZd7000MeV_e_2.7e-7':{},
+            'dark_photons_mZd1100MeV_e_3.12e-6':{},
+            'dark_photons_mZd7000MeV_e_2.7e-7':{},
         }
-        self.input_dir = '/eos/user/s/sbenabde/MG5_aMC_v3_5_11/Root_files_HAHM'
-        self.output_dir = "/eos/user/s/sbenabde/FCCAnalyses/examples/FCCee/bsm/LLPs/DarkPhotons/STAGE1_output"
+        self.input_dir = '/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons'
+        self.output_dir = "STAGE1_output"
         
         self.analysis_name = 'My Analysis'
         self.n_threads = 1
@@ -147,19 +147,19 @@ class Analysis():
             .Define("FSGen_Lxy",   "return sqrt(FSGenMuon_vertex_x*FSGenMuon_vertex_x + FSGenMuon_vertex_y*FSGenMuon_vertex_y)")
             .Define("FSGen_Lxyz",  "return sqrt(FSGenMuon_vertex_x*FSGenMuon_vertex_x + FSGenMuon_vertex_y*FSGenMuon_vertex_y + FSGenMuon_vertex_z*FSGenMuon_vertex_z)")
             
-            # MC event primary vertex
-            .Define("MC_PrimaryVertex",     "FCCAnalyses::MCParticle::get_EventPrimaryVertex(21)(Particle)" ) #21 is the PDG ID of the collision point, at coo (0,0,0)
+            # # MC event primary vertex
+            # .Define("MC_PrimaryVertex",     "FCCAnalyses::MCParticle::get_EventPrimaryVertex(21)(Particle)" ) #21 is the PDG ID of the collision point, at coo (0,0,0)
             
-            #Vertex fitting
-            .Define("n_tracks",             "ReconstructedParticle2Track::getTK_n(EFlowTracks)")    #number of tracks
+            # #Vertex fitting
+            # .Define("n_tracks",             "ReconstructedParticle2Track::getTK_n(EFlowTracks)")    #number of tracks
 
-            #First, reconstruct a vertex from all tracks 
-            #Input parameters are 1 = primary vertex, EFlowTracks contains all tracks, bool beamspotconstraint = true, bsc sigma x/y/z
-            .Define("VertexObject_allTracks", "VertexFitterSimple::VertexFitter_Tk ( 1, EFlowTracks, true, 4.5, 20e-3, 300)")
-            .Define("RecoedPrimaryTracks",    "VertexFitterSimple::get_PrimaryTracks( EFlowTracks, true, 4.5, 20e-3, 300, 0., 0., 0.)")  #Select the tracks that are reconstructed  as primaries
-            .Define("n_RecoedPrimaryTracks",  "ReconstructedParticle2Track::getTK_n( RecoedPrimaryTracks)") #Number of reconstructed primary tracks
-            .Define("PrimaryVertexObject",    "VertexFitterSimple::VertexFitter_Tk (1, RecoedPrimaryTracks, true, 4.5, 20e-3, 300) ")  #The final primary vertex
-            .Define("PrimaryVertex",          "VertexingUtils::get_VertexData(PrimaryVertexObject)")
+            # #First, reconstruct a vertex from all tracks 
+            # #Input parameters are 1 = primary vertex, EFlowTracks contains all tracks, bool beamspotconstraint = true, bsc sigma x/y/z
+            # .Define("VertexObject_allTracks", "VertexFitterSimple::VertexFitter_Tk ( 1, EFlowTracks, true, 4.5, 20e-3, 300)")
+            # .Define("RecoedPrimaryTracks",    "VertexFitterSimple::get_PrimaryTracks( EFlowTracks, true, 4.5, 20e-3, 300, 0., 0., 0.)")  #Select the tracks that are reconstructed  as primaries
+            # .Define("n_RecoedPrimaryTracks",  "ReconstructedParticle2Track::getTK_n( RecoedPrimaryTracks)") #Number of reconstructed primary tracks
+            # .Define("PrimaryVertexObject",    "VertexFitterSimple::VertexFitter_Tk (1, RecoedPrimaryTracks, true, 4.5, 20e-3, 300) ")  #The final primary vertex
+            # .Define("PrimaryVertex",          "VertexingUtils::get_VertexData(PrimaryVertexObject)")
                
 
             # #Displaced vertex
@@ -258,11 +258,35 @@ class Analysis():
           
 #             .Define("n_DVs", "int(DV1_chi2 >= 0) + int(DV2_chi2 >= 0)")
         
+
+                    # MC event primary vertex
+            .Define("MC_PrimaryVertex",  "FCCAnalyses::MCParticle::get_EventPrimaryVertex(21)(Particle)" )
             
-            .Define("AllMuons_tracks",  "ReconstructedParticle2Track::getRP2TRK(RecoMuons, EFlowTracks)")
-            .Define("AMVF_Vertices",    "VertexFinderActs::VertexFinderAMVF(AllMuons_tracks)")
-            .Define("n_AMVF_DVs",       "VertexingUtils::get_nVertices(AMVF_Vertices)")
-            .Define("AMVF_Masses",      "VertexingUtils::get_invM(AMVF_Vertices)")
+            #Vertex fitting
+            .Define("n_tracks", "ReconstructedParticle2Track::getTK_n(EFlowTracks)")    #number of tracks
+
+            #First, reconstruct a vertex from all tracks 
+            #Input parameters are 1 = primary vertex, EFlowTracks contains all tracks, bool beamspotconstraint = true, bsc sigma x/y/z
+            .Define("VertexObject_allTracks", "VertexFitterSimple::VertexFitter_Tk ( 1, EFlowTracks, true, 4.5, 20e-3, 300)")
+
+            .Define("RecoedPrimaryTracks",    "VertexFitterSimple::get_PrimaryTracks( EFlowTracks, true, 4.5, 20e-3, 300, 0., 0., 0.)")  #Select the tracks that are reconstructed  as primaries
+            .Define("n_RecoedPrimaryTracks",  "ReconstructedParticle2Track::getTK_n( RecoedPrimaryTracks)")
+
+            .Define("PrimaryVertexObject",    "VertexFitterSimple::VertexFitter_Tk (1, RecoedPrimaryTracks, true, 4.5, 20e-3, 300) ")  #the final primary vertex
+            .Define("PrimaryVertex",          "VertexingUtils::get_VertexData(PrimaryVertexObject)")
+               
+
+            .Define("sel_tracks_pt",        'VertexingUtils::sel_pt_tracks(1)(EFlowTracks)') #Requires Pt < 1 GeV    
+            .Define("sel_tracks",           'VertexingUtils::sel_d0_tracks(2)(sel_tracks_pt)') #Use the new d0 significance filter (e.g., significance > 2.0)
+            .Define("DV_evt_seltracks",     "VertexFinderLCFIPlus::get_SV_event(sel_tracks, EFlowTracks, PrimaryVertexObject, true, 9., 40., 5.)")
+            .Define('n_seltracks_DVs',      'VertexingUtils::get_n_SV(DV_evt_seltracks)')
+            .Define('n_trks_seltracks_DVs', 'VertexingUtils::get_VertexNtrk(DV_evt_seltracks)')  #Number of tracks from the DVs
+            .Define('invMass_seltracks_DVs','VertexingUtils::get_invM(DV_evt_seltracks)') 
+            
+            # .Define("AllMuons_tracks",  "ReconstructedParticle2Track::getRP2TRK(RecoMuons, EFlowTracks)")
+            # .Define("AMVF_Vertices",    "VertexFinderActs::VertexFinderAMVF(AllMuons_tracks)")
+            # .Define("n_AMVF_DVs",       "VertexingUtils::get_nVertex(AMVF_Vertices)")
+            # .Define("AMVF_Masses",      "VertexingUtils::get_invM(AMVF_Vertices)")
 
             # .Define("AllMuons_VertexObject", "if(AllMuons_tracks.size() >= 2) return VertexFitterSimple::VertexFitter_Tk(AllMuons_tracks.size(), AllMuons_tracks); else return VertexingUtils::FCCAnalysesVertex();")
             # .Define("AllMuons_VertexData", "VertexingUtils::get_VertexData(AllMuons_VertexObject)")
@@ -400,6 +424,7 @@ class Analysis():
             #'n_AMVF_DVs',
             #'DV2_invM',
             #'DV2_invM',
-            'AMVF_Masses',
+            #AMVF_Masses',
+            # 'n_seltracks_DVs',
         ]
         return branch_list
