@@ -21,25 +21,32 @@ splitLeg       = False
 variables = ['n_RecoMuons_raw;1',
             'RecoMuon_pt_raw;1',
 
-            'n_zjj_raw;1',
-            'zjj_pt_raw;1',
-            'zjj_pt_sum_raw;1',
-            'zjj_invMass_raw;1',
+            'n_DVs_raw;1',
+            'DV1_Lxyz_raw;1',
+            'DV2_Lxyz_raw;1',
+            'AllMuons_Lxyz_raw;1',
+            'n_GlobalDVs_raw;1',
 
-            'zjj_leading_pt_raw;1',
-            'zjj_subleading_pt_raw;1',
-            'N_Selected_muons_raw;1',
+            # 'n_zjj',
+            # 'zjj_pt',
+            # 'zjj_pt_sum',
+            # 'zjj_invMass',
 
-            'MuonPair1_charge_raw;1',
-            'MuonPair2_charge_raw;1',
-            'MuonPairs_InvMass_raw;1',
-            "MuonPair1_dR_raw;1",
-            "MuonPair2_dR_raw;1",
-            'MuonPair1_total_charge_raw;1',
-            'MuonPair1_total_InvMass_raw;1',
-            'MuonPair2_total_charge_raw;1',
-            'MuonPair2_total_InvMass_raw;1',
+            # 'zjj_leading_pt',
+            # 'zjj_subleading_pt',
+            # 'N_Selected_muons',
 
+            # 'MuonPair1_charge',
+            # 'MuonPair2_charge',
+            # 'MuonPairs_InvMass',
+            # "MuonPair1_dR",
+            # "MuonPair2_dR",
+            # 'MuonPair1_total_charge',
+            # 'MuonPair1_total_InvMass',
+            # 'MuonPair2_total_charge',
+            # 'MuonPair2_total_InvMass',
+
+            # 'invMass_seltracks_DVs_raw;1',
                         
 ]
 
@@ -47,13 +54,13 @@ variables = ['n_RecoMuons_raw;1',
 selections = {}
 selections['DarkPhotons']  = [
     "selNone",
-    "Z-mass",
-    # "Z-mass2",
-    # "Z-mass3",
-    # "Z-mass4",
-    # "4_muons",
-    "4_opposite_charge_muons",
-    "Full_selection"
+    # "Z-mass",
+    # # "Z-mass2",
+    # # "Z-mass3",
+    # # "Z-mass4",
+    # # "4_muons",
+    # "4_opposite_charge_muons",
+    # "Full_selection"
 ]
 
 extralabel = {}
@@ -70,31 +77,31 @@ linestyle = {}
 colors = {}
 colors['dark_photons_mZd360MeV_e_1e-5'] = ROOT.kViolet-5
 colors['dark_photons_mZd1100MeV_e_3.12e-6'] = ROOT.kMagenta+4
-colors['dark_photons_mZd7000MeV_e_8.8e-7'] = ROOT.kPink+10
+colors['dark_photons_mZd7000MeV_e_2.7e-7'] = ROOT.kPink+10
 # colors['wzp6_ee_ccH_Hmumu_ecm240'] = ROOT.kBlue-10
 # colors['wzp6_ee_mumuH_Hbb_ecm240'] = ROOT.kRed-10
 # colors['mgp8_ee_zh_ecm240'] = ROOT.kMagenta-10
-colors['wzp6_ee_bbH_HZZ_ecm240'] = ROOT.kMagenta-10
+#colors['wzp6_ee_bbH_HZZ_ecm240'] = ROOT.kMagenta-10
 
 plots = {}
 plots['DarkPhotons'] = {
       'signal':{'dark_photons_mZd360MeV_e_1e-5':['dark_photons_mZd360MeV_e_1e-5'],
                 'dark_photons_mZd1100MeV_e_3.12e-6':['dark_photons_mZd1100MeV_e_3.12e-6'],
-                'dark_photons_mZd7000MeV_e_8.8e-7':['dark_photons_mZd7000MeV_e_8.8e-7'],
+                'dark_photons_mZd7000MeV_e_2.7e-7':['dark_photons_mZd7000MeV_e_2.7e-7'],
                 },
         'backgrounds':{#'wzp6_ee_ccH_Hmumu_ecm240':['wzp6_ee_ccH_Hmumu_ecm240'],
                     #'wzp6_ee_mumuH_Hbb_ecm240':['wzp6_ee_mumuH_Hbb_ecm240'],
                     #'mgp8_ee_zh_ecm240':['mgp8_ee_zh_ecm240'],
-                    'wzp6_ee_bbH_HZZ_ecm240':['wzp6_ee_bbH_HZZ_ecm240'],
+                    #'wzp6_ee_bbH_HZZ_ecm240':['wzp6_ee_bbH_HZZ_ecm240'],
                 }
             }
 
 legend = {}
 legend['dark_photons_mZd360MeV_e_1e-5'] = r'360MeV, 1\times10^{-5}'
 legend['dark_photons_mZd1100MeV_e_3.12e-6'] = r'1100MeV, 3.12\times10^{-6}'
-legend['dark_photons_mZd7000MeV_e_8.8e-7'] = r'7000MeV, 8.8\times10^{-7}'
+legend['dark_photons_mZd7000MeV_e_2.7e-7'] = r'7000MeV, 2.7\times10^{-7}'
 # legend['wzp6_ee_ccH_Hmumu_ecm240'] = r'Z_cc, H_mumu'
 # legend['wzp6_ee_mumuH_Hbb_ecm240'] = r'Z_mumu, H_bb'
 # legend['mgp8_ee_zh_ecm240'] = r'ZH'
-legend['wzp6_ee_bbH_HZZ_ecm240'] = r'z_bb, H_ZZ'
+#legend['wzp6_ee_bbH_HZZ_ecm240'] = r'z_bb, H_ZZ'
 

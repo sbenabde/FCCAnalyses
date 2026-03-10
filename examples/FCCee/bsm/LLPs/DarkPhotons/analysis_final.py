@@ -9,11 +9,11 @@ outputDir = "/eos/user/s/sbenabde/FCCAnalyses/examples/FCCee/bsm/LLPs/DarkPhoton
 processList = {
         'dark_photons_mZd360MeV_e_1e-5':{},
         'dark_photons_mZd1100MeV_e_3.12e-6':{},
-        'dark_photons_mZd7000MeV_e_8.8e-7':{},
+        'dark_photons_mZd7000MeV_e_2.7e-7':{},
         # 'wzp6_ee_ccH_Hmumu_ecm240':{},
         # 'mgp8_ee_zh_ecm240':{},
         # 'wzp6_ee_mumuH_Hbb_ecm240':{},
-        'wzp6_ee_bbH_HZZ_ecm240':{},
+        #'wzp6_ee_bbH_HZZ_ecm240':{},
 }
 processLabels = {
     # #signals
@@ -24,7 +24,7 @@ processLabels = {
     # 'wzp6_ee_ccH_Hmumu_ecm240': r"H --> mumu",
     # 'mgp8_ee_zh_ecm240': r"e^{+}e^{-} #\rightarrow Z h",
     # 'wzp6_ee_mumuH_Hbb_ecm240': r"H --> bb"
-    'wzp6_ee_bbH_HZZ_ecm240': r"e^{+}e^{-} #\rightarrow Z h",
+    #'wzp6_ee_bbH_HZZ_ecm240': r"e^{+}e^{-} #\rightarrow Z h",
 }
 
 #Link to the dictionary that contains all the cross section information etc...
@@ -115,7 +115,16 @@ histoList = {
     "MuonPair2_total_charge":       {"name":'MuonPair2_total_charge',    "title": "Pair2 tot. charge",                            "bin":10,  "xmin":-1.5,   "xmax":1.5},     
     "MuonPair2_total_InvMass":      {"name":'MuonPair2_total_InvMass',   "title": "Invariant mass of DP_2",                       "bin":100, "xmin":0,      "xmax":10},  
 
+
+    # "invMass_seltracks_DVs":        {"name":'invMass_seltracks_DVs',      "title": "Invariant mass of DV",                        "bin":100, "xmin":0,      "xmax":10},  
+
     "MuonPair1_dR":                 {"name":'MuonPair1_dR',               "title": "Pair1 dR",                                    "bin":100, "xmin":-0.5,   "xmax":5.5},  
     "MuonPair2_dR":                 {"name":'MuonPair2_dR',               "title": "Pair2 dR",                                    "bin":100, "xmin":-0.5,   "xmax":5.5},  
-}
+    
+    "DV1_Lxyz":                     {"name":'DV1_Lxyz',                   "title": "Pair1 Lxyz",                                   "bin":100, "xmin":-0,   "xmax":2},  
+    "DV2_Lxyz":                     {"name":'DV2_Lxyz',                   "title": "Pair2 Lxyz",                                   "bin":100, "xmin":-0,   "xmax":2},  
+    "AllMuons_Lxyz":                {"name":'AllMuons_Lxyz',              "title": "All Lxy",                                     "bin":100, "xmin":0,      "xmax":2},  
+    "n_DVs":                        {"name":'n_DVs',                      "title": "Number of DV muon pairs",                     "bin":10,  "xmin":0.5,   "xmax":4.5},    
+    "n_GlobalDVs":                  {"name":'n_GlobalDVs',                "title": "Number of DV all muons",                      "bin":10,  "xmin":0,     "xmax":5},    
 
+}
