@@ -146,18 +146,7 @@ class Analysis():
             .Define("FSGen_Lxy",   "return sqrt(FSGenMuon_vertex_x*FSGenMuon_vertex_x + FSGenMuon_vertex_y*FSGenMuon_vertex_y)")
             .Define("FSGen_Lxyz",  "return sqrt(FSGenMuon_vertex_x*FSGenMuon_vertex_x + FSGenMuon_vertex_y*FSGenMuon_vertex_y + FSGenMuon_vertex_z*FSGenMuon_vertex_z)")
             
-            # # MC event primary vertex
-            .Define("MC_PrimaryVertex",     "FCCAnalyses::MCParticle::get_EventPrimaryVertex(21)(Particle)" ) #21 is the PDG ID of the collision point, at coo (0,0,0)
-            .Define("n_tracks",             "ReconstructedParticle2Track::getTK_n(EFlowTracks)")    #number of tracks
-
-            #First, reconstruct a vertex from all tracks 
-            #Input parameters are 1 = primary vertex, EFlowTracks contains all tracks, bool beamspotconstraint = true, bsc sigma x/y/z
-            .Define("VertexObject_allTracks", "VertexFitterSimple::VertexFitter_Tk(1, EFlowTracks, true, 4.5, 20e-3, 300)")
-            .Define("RecoedPrimaryTracks",    "VertexFitterSimple::get_PrimaryTracks(EFlowTracks, true, 4.5, 20e-3, 300, 0., 0., 0.)")  #Select the tracks that are reconstructed  as primaries
-            .Define("n_RecoedPrimaryTracks",  "ReconstructedParticle2Track::getTK_n(RecoedPrimaryTracks)") #Number of reconstructed primary tracks
-            .Define("PrimaryVertexObject",    "VertexFitterSimple::VertexFitter_Tk(1, RecoedPrimaryTracks, true, 4.5, 20e-3, 300) ")  #The final primary vertex
-            .Define("PrimaryVertex",          "VertexingUtils::get_VertexData(PrimaryVertexObject)")
-
+   
 #---------- Reconstructed muons ------------------------------------------------------------------------------------------------------------------------------------------------------
 
             .Define("RecoMuons",        "ReconstructedParticle::get(Muon0, ReconstructedParticles)")
@@ -230,7 +219,21 @@ class Analysis():
 
 
 #---------- Vertexing  ------------------------------------------------------------------------------------------------------------------------------------------------------
-                           
+
+
+            # MC event primary vertex
+            .Define("MC_PrimaryVertex",     "FCCAnalyses::MCParticle::get_EventPrimaryVertex(21)(Particle)" ) #21 is the PDG ID of the collision point, at coo (0,0,0)
+            .Define("n_tracks",             "ReconstructedParticle2Track::getTK_n(EFlowTracks)")    #number of tracks
+
+            #First, reconstruct a vertex from all tracks 
+            #Input parameters are 1 = primary vertex, EFlowTracks contains all tracks, bool beamspotconstraint = true, bsc sigma x/y/z
+            .Define("VertexObject_allTracks", "VertexFitterSimple::VertexFitter_Tk(1, EFlowTracks, true, 4.5, 20e-3, 300)")
+            .Define("RecoedPrimaryTracks",    "VertexFitterSimple::get_PrimaryTracks(EFlowTracks, true, 4.5, 20e-3, 300, 0., 0., 0.)")  #Select the tracks that are reconstructed  as primaries
+            .Define("n_RecoedPrimaryTracks",  "ReconstructedParticle2Track::getTK_n(RecoedPrimaryTracks)") #Number of reconstructed primary tracks
+            .Define("PrimaryVertexObject",    "VertexFitterSimple::VertexFitter_Tk(1, RecoedPrimaryTracks, true, 4.5, 20e-3, 300) ")  #The final primary vertex
+            .Define("PrimaryVertex",          "VertexingUtils::get_VertexData(PrimaryVertexObject)")
+
+
             #Muon Pairs Vertexing
             .Define("MuonPair1_tracks",         "ReconstructedParticle2Track::getRP2TRK(MuonPair1, EFlowTracks)")
             .Define("MuonPair2_tracks",         "ReconstructedParticle2Track::getRP2TRK(MuonPair2, EFlowTracks)")

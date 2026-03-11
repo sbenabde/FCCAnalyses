@@ -11,42 +11,37 @@ ana_tex        = 'e^{+}e^{-} #rightarrow Zh, Z #rightarrow qq, h #rightarrow Z_{
 delphesVersion = '3.4.2'
 energy         = 240
 collider       = 'FCC-ee'
-inputDir       = "/eos/user/s/sbenabde/FCCAnalyses/examples/FCCee/bsm/LLPs/DarkPhotons/FINAL_output/"
+inputDir       = "FINAL_output/"
 formats        = ['png']
 yaxis          = ['lin','log']
 stacksig       = ['nostack']
-outdir         = '/eos/user/s/sbenabde/FCCAnalyses/examples/FCCee/bsm/LLPs/DarkPhotons/PLOTS_output/'
+outdir         = 'PLOTS_output/'
 splitLeg       = False
 
-variables = ['n_RecoMuons_raw;1',
-            'RecoMuon_pt_raw;1',
+variables = ['n_RecoMuons',
+            'RecoMuon_pt',
 
-            'n_DVs_raw;1',
-            'DV1_Lxyz_raw;1',
-            'DV2_Lxyz_raw;1',
-            'AllMuons_Lxyz_raw;1',
-            'n_GlobalDVs_raw;1',
+            'n_DVs',
+            'DV1_Lxyz',
+            # 'DV2_Lxyz',
+            'RecoMuons_Lxyz',
+            # 'n_GlobalDVs_raw;1',
 
-            # 'n_zjj',
-            # 'zjj_pt',
-            # 'zjj_pt_sum',
-            # 'zjj_invMass',
+            'n_zjj',
+            'zjj_pt',
+            'zjj_leading_pt',
+            'zjj_subleading_pt',
+            'zjj_invMass',
 
-            # 'zjj_leading_pt',
-            # 'zjj_subleading_pt',
-            # 'N_Selected_muons',
-
-            # 'MuonPair1_charge',
-            # 'MuonPair2_charge',
-            # 'MuonPairs_InvMass',
-            # "MuonPair1_dR",
-            # "MuonPair2_dR",
-            # 'MuonPair1_total_charge',
-            # 'MuonPair1_total_InvMass',
-            # 'MuonPair2_total_charge',
-            # 'MuonPair2_total_InvMass',
-
-            # 'invMass_seltracks_DVs_raw;1',
+            'MuonPair1_charge',
+            'MuonPair2_charge',
+            'MuonPairs_InvMass',
+            "MuonPair1_dR",
+            "MuonPair2_dR",
+            'MuonPair1_total_charge',
+            'MuonPair1_total_InvMass',
+            'MuonPair2_total_charge',
+            'MuonPair2_total_InvMass',
                         
 ]
 
@@ -54,13 +49,16 @@ variables = ['n_RecoMuons_raw;1',
 selections = {}
 selections['DarkPhotons']  = [
     "selNone",
-    # "Z-mass",
-    # # "Z-mass2",
-    # # "Z-mass3",
-    # # "Z-mass4",
-    # # "4_muons",
-    # "4_opposite_charge_muons",
-    # "Full_selection"
+    "Z-mass",
+    "Z-mass2",
+    "Z-mass3",
+    "Z-mass4",
+    "4_muons",
+    "4_opposite_charge_muons",
+    "Full_selection",
+    "Full_selection2",
+    "Full_selection3",
+    "Full_selection4",
 ]
 
 extralabel = {}
@@ -72,6 +70,9 @@ extralabel['Z-mass4']  = r"n_{zjj} >= 2 & 85 < m_{Z} < 95 GeV"
 extralabel['4_muons'] = r"At least 4 RecoMuons"
 extralabel['4_opposite_charge_muons'] = r"At least 4 RecoMuons, 2 of each charge"
 extralabel['Full_selection'] = r"Full Selection"
+extralabel['Full_selection2'] = r"Full Selection2"
+extralabel['Full_selection3'] = r"Full Selection3"
+extralabel['Full_selection4'] = r"Full Selection4"
 
 linestyle = {}
 colors = {}
@@ -81,7 +82,7 @@ colors['dark_photons_mZd7000MeV_e_2.7e-7'] = ROOT.kPink+10
 # colors['wzp6_ee_ccH_Hmumu_ecm240'] = ROOT.kBlue-10
 # colors['wzp6_ee_mumuH_Hbb_ecm240'] = ROOT.kRed-10
 # colors['mgp8_ee_zh_ecm240'] = ROOT.kMagenta-10
-#colors['wzp6_ee_bbH_HZZ_ecm240'] = ROOT.kMagenta-10
+colors['wzp6_ee_bbH_HZZ_ecm240'] = ROOT.kMagenta-10
 
 plots = {}
 plots['DarkPhotons'] = {
@@ -92,7 +93,7 @@ plots['DarkPhotons'] = {
         'backgrounds':{#'wzp6_ee_ccH_Hmumu_ecm240':['wzp6_ee_ccH_Hmumu_ecm240'],
                     #'wzp6_ee_mumuH_Hbb_ecm240':['wzp6_ee_mumuH_Hbb_ecm240'],
                     #'mgp8_ee_zh_ecm240':['mgp8_ee_zh_ecm240'],
-                    #'wzp6_ee_bbH_HZZ_ecm240':['wzp6_ee_bbH_HZZ_ecm240'],
+                    'wzp6_ee_bbH_HZZ_ecm240':['wzp6_ee_bbH_HZZ_ecm240'],
                 }
             }
 
@@ -103,5 +104,5 @@ legend['dark_photons_mZd7000MeV_e_2.7e-7'] = '7000MeV, 2.7#times10^{-7}'
 # legend['wzp6_ee_ccH_Hmumu_ecm240'] = r'Z_cc, H_mumu'
 # legend['wzp6_ee_mumuH_Hbb_ecm240'] = r'Z_mumu, H_bb'
 # legend['mgp8_ee_zh_ecm240'] = r'ZH'
-#legend['wzp6_ee_bbH_HZZ_ecm240'] = r'z_bb, H_ZZ'
+legend['wzp6_ee_bbH_HZZ_ecm240'] = 'z #rightarrow b#bar{b}, H #rightarrow ZZ'
 
