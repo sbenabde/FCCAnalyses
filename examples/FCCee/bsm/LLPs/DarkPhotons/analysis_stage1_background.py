@@ -91,6 +91,16 @@ class Analysis():
     def __init__(self, cmdline_args):
         
         self.process_list = {
+            #'wzp6_ee_mumuH_Hmumu_ecm240':{'fraction':0.025},
+            'wzp6_ee_qqH_Hmumu_ecm240':{'fraction':0.025},
+            'wzp6_ee_ccH_Hmumu_ecm240':{'fraction':0.025},
+            'wzp6_ee_bbH_Hmumu_ecm240':{'fraction':0.033},
+            'wzp6_ee_qqH_HZZ_llll_ecm240':{'fraction':0.083},
+            'wzp6_ee_qqH_HWW_ecm240':{'fraction':0.09},
+            'wzp6_ee_ccH_HWW_ecm240':{'fraction':0.083},
+            'wzp6_ee_bbH_HWW_ecm240':{'fraction':0.01},
+            'wzp6_ee_mumuH_Hbb_ecm240':{'fraction':0.033},
+            
             'wzp6_ee_bbH_HZZ_ecm240':{'fraction':0.01},
         }
 

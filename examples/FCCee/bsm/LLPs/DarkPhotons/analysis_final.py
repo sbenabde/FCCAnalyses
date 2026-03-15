@@ -7,24 +7,42 @@ outputDir = "FINAL_output"
 
 #Run over the full statistics from stage1 input file
 processList = {
+        #Signal
         'dark_photons_mZd360MeV_e_1e-5':{},
         'dark_photons_mZd1100MeV_e_3.12e-6':{},
         'dark_photons_mZd7000MeV_e_2.7e-7':{},
-        # 'wzp6_ee_ccH_Hmumu_ecm240':{},
-        # 'mgp8_ee_zh_ecm240':{},
-        # 'wzp6_ee_mumuH_Hbb_ecm240':{},
+
+        #Background
+        # 'wzp6_ee_mumuH_Hmumu_ecm240':{},
+        'wzp6_ee_qqH_Hmumu_ecm240':{},
+        'wzp6_ee_ccH_Hmumu_ecm240':{},
+        'wzp6_ee_bbH_Hmumu_ecm240':{},
+        'wzp6_ee_qqH_HZZ_llll_ecm240':{},
+        'wzp6_ee_qqH_HWW_ecm240':{},
+        'wzp6_ee_ccH_HWW_ecm240':{},
+        'wzp6_ee_bbH_HWW_ecm240':{},
+        'wzp6_ee_mumuH_Hbb_ecm240':{},
+        
         'wzp6_ee_bbH_HZZ_ecm240':{},
 }
+
+
 processLabels = {
     # #signals
-    'dark_photons_mZd360MeV_e_1e-5': r"m$_{Z_D}$=360MeV, $\epsilon$=1*10$^{-5}$",
+    'dark_photons_mZd360MeV_e_1e-5':     r"m$_{Z_D}$=360MeV, $\epsilon$=1*10$^{-5}$",
     'dark_photons_mZd1100MeV_e_3.12e-6': r"m$_{Z_D}$=1100MeV, $\epsilon$=3.12*10$^{-6}$",
-    'dark_photons_mZd7000MeV_e_8.8e-7': r"m$_{Z_D}$=7000MeV, $\epsilon$=8.8*10$^{-7}$",
+    'dark_photons_mZd7000MeV_e_8.8e-7':  r"m$_{Z_D}$=7000MeV, $\epsilon$=8.8*10$^{-7}$",
     #Backgrounds
-    # 'wzp6_ee_ccH_Hmumu_ecm240': r"H --> mumu",
-    # 'mgp8_ee_zh_ecm240': r"e^{+}e^{-} #\rightarrow Z h",
-    # 'wzp6_ee_mumuH_Hbb_ecm240': r"H --> bb"
-    'wzp6_ee_bbH_HZZ_ecm240': r"e^{+}e^{-} #\rightarrow Z h",
+    'wzp6_ee_qqH_Hmumu_ecm240':     r"Z #\rightarrow qq, h #\rightarrow #mu #mu",
+    'wzp6_ee_ccH_Hmumu_ecm240':     r"Z #\rightarrow cc, h #\rightarrow #mu #mu",
+    'wzp6_ee_bbH_Hmumu_ecm240':     r"Z #\rightarrow bb, h #\rightarrow #mu #mu",
+    'wzp6_ee_qqH_HZZ_llll_ecm240':  r"Z #\rightarrow qq, h #\rightarrow ZZ #\rightarrow llll",
+    'wzp6_ee_qqH_HWW_ecm240':       r"Z #\rightarrow qq, h #\rightarrow WW",
+    'wzp6_ee_ccH_HWW_ecm240':       r"Z #\rightarrow cc, h #\rightarrow WW",
+    'wzp6_ee_bbH_HWW_ecm240':       r"Z #\rightarrow bb, h #\rightarrow WW",
+    'wzp6_ee_mumuH_Hbb_ecm240':     r"Z #\rightarrow #mu #mu, h #\rightarrow bb",
+   
+    'wzp6_ee_bbH_HZZ_ecm240':       r"Z #\rightarrow bb, h #\rightarrow ZZ",
 }
 
 #Link to the dictionary that contains all the cross section information etc...
@@ -104,7 +122,7 @@ histoList = {
 
     'n_zjj':                        {"name":'n_zjj',                     "title": "Number of reco. jets",                        "bin":10,  "xmin":-0.5,  "xmax":9.5},    
     'zjj_pt':                       {"name":'zjj_pt',                    "title": "Jets p_{T} [GeV]",                            "bin":100, "xmin":0,     "xmax":150},    
-    'zjj_invMass':                  {"name":'zjj_invMass',               "title": "Invariant mass of Z boson candidate [GeV]",   "bin":100, "xmin":50,     "xmax":150},     
+    'zjj_invMass':                  {"name":'zjj_invMass',               "title": "M_{jj} [GeV]",                                "bin":100, "xmin":50,     "xmax":150},     
     
     'zjj_leading_pt':               {"name":'zjj_leading_pt',            "title": "Leading jet p_{T} [GeV]",                     "bin":100, "xmin":0,     "xmax":150},    
     'zjj_subleading_pt':            {"name":'zjj_subleading_pt',         "title": "Subleading jet p_{T} [GeV]",                  "bin":100, "xmin":0,     "xmax":150},    
@@ -112,12 +130,12 @@ histoList = {
     'MuonPair1_charge':             {"name":'MuonPair1_charge',          "title": "Charge of Pair1",                             "bin":10, "xmin":-1.5,    "xmax":1.5},     
     'MuonPair2_charge':             {"name":'MuonPair2_charge',          "title": "Charge of Pair2",                             "bin":10, "xmin":-1.5,    "xmax":1.5},     
     "MuonPairs_charge":             {"name":'MuonPairs_charge',          "title": "Charge of Pair1 + Pair2",                     "bin":10,  "xmin":-1.5,   "xmax":1.5},     
-    "MuonPairs_InvMass":            {"name":'MuonPairs_InvMass',         "title": "Invariant mass of Higgs candidate [GeV]",     "bin":100, "xmin":115,    "xmax":135},            
+    "MuonPairs_InvMass":            {"name":'MuonPairs_InvMass',         "title": "M_{#mu #mu #mu #mu} [GeV]",                   "bin":100, "xmin":115,    "xmax":135},            
 
     "MuonPair1_total_charge":       {"name":'MuonPair1_total_charge',    "title": "Pair1 tot. charge",                           "bin":10,  "xmin":-1.5,   "xmax":1.5},     
-    "MuonPair1_total_InvMass":      {"name":'MuonPair1_total_InvMass',   "title": "Invariant mass of DP_1 [GeV]",                "bin":100, "xmin":0,      "xmax":10},  
+    "MuonPair1_total_InvMass":      {"name":'MuonPair1_total_InvMass',   "title": "M_{#mu_{1}#mu_{2}} [GeV]",                "bin":100, "xmin":0,      "xmax":10},  
     "MuonPair2_total_charge":       {"name":'MuonPair2_total_charge',    "title": "Pair2 tot. charge",                           "bin":10,  "xmin":-1.5,   "xmax":1.5},     
-    "MuonPair2_total_InvMass":      {"name":'MuonPair2_total_InvMass',   "title": "Invariant mass of DP_2 [GeV]",                "bin":100, "xmin":0,      "xmax":10},  
+    "MuonPair2_total_InvMass":      {"name":'MuonPair2_total_InvMass',   "title": "M_{#mu_{3}#mu_{4}} [GeV]",                "bin":100, "xmin":0,      "xmax":10},  
  
     "MuonPair1_dR":                 {"name":'MuonPair1_dR',               "title": "Pair1 dR",                                    "bin":100, "xmin":0,   "xmax":5},  
     "MuonPair2_dR":                 {"name":'MuonPair2_dR',               "title": "Pair2 dR",                                    "bin":100, "xmin":0,   "xmax":5},  
@@ -129,4 +147,9 @@ histoList = {
     # # "n_GlobalDVs":                  {"name":'n_GlobalDVs',                "title": "Number of DV all muons",                      "bin":10,  "xmin":0,     "xmax":5},    
     # "DV1_invM":                     {"name":'DV1_invM',                   "title": "Invariant mass of DP_1 [GeV]",                "bin":100, "xmin":0,      "xmax":10},  
     # "DV2_invM":                     {"name":'DV2_invM',                   "title": "Invariant mass of DP_2 [GeV]",                "bin":100, "xmin":0,      "xmax":10},  
+    # "SecondaryVertex_Lxyz":               {"name":'SecondaryVertex_Lxyz',             "title": "All Lxy",                                     "bin":100, "xmin":0,      "xmax":2},  
+    #"n_total_tracks":                {"name":'n_total_tracks',                      "title": "Number of DV muon pairs",                     "bin":100,  "xmin":0,   "xmax":100},    
+
 }
+
+
