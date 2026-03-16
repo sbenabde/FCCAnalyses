@@ -92,16 +92,19 @@ class Analysis():
         
         self.process_list = {
             #'wzp6_ee_mumuH_Hmumu_ecm240':{'fraction':0.025},
-            'wzp6_ee_qqH_Hmumu_ecm240':{'fraction':0.025},
-            'wzp6_ee_ccH_Hmumu_ecm240':{'fraction':0.025},
-            'wzp6_ee_bbH_Hmumu_ecm240':{'fraction':0.033},
-            'wzp6_ee_qqH_HZZ_llll_ecm240':{'fraction':0.083},
-            'wzp6_ee_qqH_HWW_ecm240':{'fraction':0.09},
-            'wzp6_ee_ccH_HWW_ecm240':{'fraction':0.083},
-            'wzp6_ee_bbH_HWW_ecm240':{'fraction':0.01},
-            'wzp6_ee_mumuH_Hbb_ecm240':{'fraction':0.033},
+
+            # 'wzp6_ee_qqH_Hmumu_ecm240':{'fraction':0.025},
+            # 'wzp6_ee_ccH_Hmumu_ecm240':{'fraction':0.025},
+            # 'wzp6_ee_bbH_Hmumu_ecm240':{'fraction':0.033},
+            # 'wzp6_ee_qqH_HZZ_llll_ecm240':{'fraction':0.083},
+            # 'wzp6_ee_qqH_HWW_ecm240':{'fraction':0.09},
+            # 'wzp6_ee_ccH_HWW_ecm240':{'fraction':0.083},
+            # 'wzp6_ee_bbH_HWW_ecm240':{'fraction':0.01},
+            # 'wzp6_ee_mumuH_Hbb_ecm240':{'fraction':0.033},
             
-            'wzp6_ee_bbH_HZZ_ecm240':{'fraction':0.01},
+            #'wzp6_ee_bbH_HZZ_ecm240':{'fraction':0.01},
+            #'p8_ee_ZZ_ecm240':{'fraction':0.01}
+            'p8_ee_WW_ecm240':{'fraction':0.01}
         }
 
         self.prod_tag = 'FCCee/winter2023/IDEA/'
@@ -126,34 +129,34 @@ class Analysis():
             .Alias('EFlowTracks', f"{TTree_EflowTrack_Name}")
 
 #---------- Generated muons ------------------------------------------------------------------------------------------------------------------------------------------------------
-            .Define("GenMuon_PID",        "FCCAnalyses::MCParticle::sel_pdgID(13, true)(Particle)") #Keep particle only if its a muon
-            .Define("FSGenMuon",          "FCCAnalyses::MCParticle::sel_genStatus(1)(GenMuon_PID)") #Keep muon only if its final state (FS)
+            # .Define("GenMuon_PID",        "FCCAnalyses::MCParticle::sel_pdgID(13, true)(Particle)") #Keep particle only if its a muon
+            # .Define("FSGenMuon",          "FCCAnalyses::MCParticle::sel_genStatus(1)(GenMuon_PID)") #Keep muon only if its final state (FS)
             
-            .Define("MC_PDG",             "FCCAnalyses::MCParticle::get_pdg(FSGenMuon)")            #Gets PDGID of particle collection in bracket
-            .Define("MC_n",               "int(MC_PDG.size())")
-            .Define("MC_M1_idx",          "myUtils::get_MCMother1(FSGenMuon, Particle0)")
-            .Define("MC_M1_part",         "ROOT::VecOps::Take(Particle, MC_M1_idx)")                #mother particles
-            .Define("MC_M1_pdg",          "FCCAnalyses::MCParticle::get_pdg(MC_M1_part)")
+            # .Define("MC_PDG",             "FCCAnalyses::MCParticle::get_pdg(FSGenMuon)")            #Gets PDGID of particle collection in bracket
+            # .Define("MC_n",               "int(MC_PDG.size())")
+            # .Define("MC_M1_idx",          "myUtils::get_MCMother1(FSGenMuon, Particle0)")
+            # .Define("MC_M1_part",         "ROOT::VecOps::Take(Particle, MC_M1_idx)")                #mother particles
+            # .Define("MC_M1_pdg",          "FCCAnalyses::MCParticle::get_pdg(MC_M1_part)")
 
-            .Define("n_FSGenMuon",        "FCCAnalyses::MCParticle::get_n(FSGenMuon)")              #Get number of final state generated muons
-            .Define("FSGenMuon_e",        "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_e(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            .Define("FSGenMuon_p",        "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_p(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
+            # .Define("n_FSGenMuon",        "FCCAnalyses::MCParticle::get_n(FSGenMuon)")              #Get number of final state generated muons
+            # .Define("FSGenMuon_e",        "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_e(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
+            # .Define("FSGenMuon_p",        "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_p(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
 
-            .Define("FSGenMuon_pt",       "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_pt(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            .Define("FSGenMuon_px",       "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_px(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            .Define("FSGenMuon_py",       "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_py(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            .Define("FSGenMuon_pz",       "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_pz(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            .Define("FSGenMuon_eta",      "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_eta(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            .Define("FSGenMuon_theta",    "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_theta(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            .Define("FSGenMuon_phi",      "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_phi(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            .Define("FSGenMuon_charge",   "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_charge(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
+            # .Define("FSGenMuon_pt",       "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_pt(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
+            # .Define("FSGenMuon_px",       "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_px(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
+            # .Define("FSGenMuon_py",       "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_py(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
+            # .Define("FSGenMuon_pz",       "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_pz(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
+            # .Define("FSGenMuon_eta",      "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_eta(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
+            # .Define("FSGenMuon_theta",    "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_theta(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
+            # .Define("FSGenMuon_phi",      "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_phi(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
+            # .Define("FSGenMuon_charge",   "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_charge(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
         
-            .Define("FSGenMuon_vertex_x", "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_vertex_x(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            .Define("FSGenMuon_vertex_y", "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_vertex_y(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            .Define("FSGenMuon_vertex_z", "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_vertex_z(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
+            # .Define("FSGenMuon_vertex_x", "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_vertex_x(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
+            # .Define("FSGenMuon_vertex_y", "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_vertex_y(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
+            # .Define("FSGenMuon_vertex_z", "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_vertex_z(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
            
-            .Define("FSGen_Lxy",   "return sqrt(FSGenMuon_vertex_x*FSGenMuon_vertex_x + FSGenMuon_vertex_y*FSGenMuon_vertex_y)")
-            .Define("FSGen_Lxyz",  "return sqrt(FSGenMuon_vertex_x*FSGenMuon_vertex_x + FSGenMuon_vertex_y*FSGenMuon_vertex_y + FSGenMuon_vertex_z*FSGenMuon_vertex_z)")
+            # .Define("FSGen_Lxy",   "return sqrt(FSGenMuon_vertex_x*FSGenMuon_vertex_x + FSGenMuon_vertex_y*FSGenMuon_vertex_y)")
+            # .Define("FSGen_Lxyz",  "return sqrt(FSGenMuon_vertex_x*FSGenMuon_vertex_x + FSGenMuon_vertex_y*FSGenMuon_vertex_y + FSGenMuon_vertex_z*FSGenMuon_vertex_z)")
             
         
 
@@ -294,9 +297,9 @@ class Analysis():
             
             .Define("n_zjj",  "int(zjj_e.size())")
 
-            .Define("zjj_leading_pt",    "return float(zjj_pt.at(0))")
-            .Define("zjj_subleading_pt", "return float(zjj_pt.at(1))")
-            
+            .Define("zjj_leading_pt",    "n_zjj > 0 ? float(zjj_pt.at(0)) : -1.0f")
+            .Define("zjj_subleading_pt", "n_zjj > 1 ? float(zjj_pt.at(1)) : -1.0f")
+
             #Leading+Subeading
             .Define("zjj_e_sum",  "if (n_zjj>1) return float(zjj_e.at(0)  + zjj_e.at(1));  else return float(-1.);")
             .Define("zjj_px_sum", "if (n_zjj>1) return float(zjj_px.at(0) + zjj_px.at(1)); else return float(-1.);")
@@ -375,15 +378,15 @@ class Analysis():
             'zjj_leading_pt',
             'zjj_subleading_pt',
 
-            #Vertexing
-            'n_DVs', 
-            'DV1_Lxyz', 
-            # 'DV2_Lxyz', 
-            # 'DV1_invM',
-            # 'DV2_invM',
+            # #Vertexing
+            # 'n_DVs', 
+            # 'DV1_Lxyz', 
+            # # 'DV2_Lxyz', 
+            # # 'DV1_invM',
+            # # 'DV2_invM',
 
-            'RecoMuons_Lxyz',
-            # 'n_GlobalDVs',
+            # 'RecoMuons_Lxyz',
+            # # 'n_GlobalDVs',
 
         ]
         return branch_list
