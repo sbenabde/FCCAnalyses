@@ -129,11 +129,18 @@ def determine_lumi_scaling(config: dict[str, Any],
                     int_lumi_in_file, config['int_lumi'])
                 scale *= config['int_lumi'] / int_lumi_in_file
 
+            if config['normalize']:
+                if hist.Integral() > 0:
+                    hist.Scale(1.0 / hist.Integral())
+                else:
+                    LOGGER.warning('Histogram %s has 0 integral, cannot normalize.', var)
+                
     else:
         if config['do_scale']:
             scale = scale * config['int_lumi']
 
     return scale
+
 
 
 # _____________________________________________________________________________
@@ -174,6 +181,13 @@ def load_hists(var: str,
                                                infile,
                                                config['scale_sig'])
             hist.Scale(scale)
+
+            if config.get('normalize', True):
+                if hist.Integral() > 0:
+                    hist.Scale(1.0 / hist.Integral())
+                else:
+                    LOGGER.warning('Histogram %s has 0 integral, cannot normalize.', var)
+
             hist.Rebin(rebin)
 
             if len(hsignal[s]) == 0:
@@ -200,6 +214,13 @@ def load_hists(var: str,
                                                infile,
                                                config['scale_bkg'])
             hist.Scale(scale)
+
+            if config.get('normalize', True):
+                if hist.Integral() > 0:
+                    hist.Scale(1.0 / hist.Integral())
+                else:
+                    LOGGER.warning('Histogram %s has 0 integral, cannot normalize.', var)
+
             hist.Rebin(rebin)
 
             if len(hbackgrounds[b]) == 0:
@@ -243,8 +264,13 @@ def mapHistosFromHistmaker(config: dict[str, Any],
                 h = tf.Get(hist_name)
                 hh = copy.deepcopy(h)
                 hh.SetDirectory(0)
-            LOGGER.info('ScaleSig: %g', scaleSig)
-            hh.Scale(param.intLumi*scaleSig)
+
+            if config.get('normalize'):
+                if hh.Integral() > 0:
+                    hh.Scale(1.0 / hh.Integral())
+                else:
+                    LOGGER.warning('Histogram %s for %s is empty!', hist_name, f)
+
             hh.Rebin(rebin)
             if len(hsignal[s]) == 0:
                 hsignal[s].append(hh)
@@ -265,7 +291,13 @@ def mapHistosFromHistmaker(config: dict[str, Any],
                 h = tf.Get(hist_name)
                 hh = copy.deepcopy(h)
                 hh.SetDirectory(0)
-            hh.Scale(param.intLumi)
+
+            if config.get('normalize'):
+                if hh.Integral() > 0:
+                    hh.Scale(1.0 / hh.Integral())
+                else:
+                    LOGGER.warning('Histogram %s for %s is empty!', hist_name, f)            
+                
             hh.Rebin(rebin)
             if len(hbackgrounds[b]) == 0:
                 hbackgrounds[b].append(hh)
@@ -328,7 +360,7 @@ def runPlots(config: dict[str, Any],
         leg2.SetTextFont(42)
     else:
         legsize = 0.04 * (len(hbackgrounds) + len(hsignal))
-        leg = ROOT.TLegend(0.65, 0.86 - legsize, 0.75, 0.88) #Position labels samples
+        leg = ROOT.TLegend(0.65, 0.75 - legsize, 0.75, 0.88) #Position labels samples
         leg2 = None
 
         if config['leg_position'][0] is not None:
@@ -348,14 +380,15 @@ def runPlots(config: dict[str, Any],
     leg.SetTextFont(42)
 
     for s in hsignal:
+        n_events = hsignal[s][0].Integral(0, -1)
         leg.AddEntry(hsignal[s][0], script_module.legend[s], "l")
+        leg.AddEntry(ROOT.nullptr, f"{n_events:.0f} events", "")
 
     for b in hbackgrounds:
-        if config['split_leg']:
-            leg2.AddEntry(hbackgrounds[b][0], script_module.legend[b], "f")
-        else:
-            leg.AddEntry(hbackgrounds[b][0], script_module.legend[b], "f")
-
+        n_events = hbackgrounds[b][0].Integral(0, -1)
+        target_leg = leg2 if config['split_leg'] else leg
+        target_leg.AddEntry(hbackgrounds[b][0], script_module.legend[b], "f")
+        target_leg.AddEntry(ROOT.nullptr, f"{n_events:.0f} events", "")
 
     yields = {}
     for s in hsignal:
@@ -668,6 +701,13 @@ def draw_plot(config: dict[str, Any],
             1.5*h_dummy.GetXaxis().GetLabelOffset())
     h_dummy.GetYaxis().SetTitle(ylabel)
 
+    if config.get('normalize'): 
+        for h in histos:
+            integral = h.Integral()
+            if integral != 0:
+                h.Scale(1.0 / integral)
+
+
     # define stacked histo
     hStack = ROOT.THStack("hstack", "")
     hStackBkg = ROOT.THStack("hstackbkg", "")
@@ -743,30 +783,24 @@ def draw_plot(config: dict[str, Any],
     if plot_params['stack-sig'] == 'stack':
         ymin_, ymax_ = get_minmax_range(hStack.GetHists(), xmin, xmax)
     else:
-        if hStackSig.GetNhists() != 0 and hStackBkg.GetNhists() != 0:
-            ymin_sig, ymax_sig = get_minmax_range(hStackSig.GetHists(),
-                                                  xmin, xmax)
-            ymin_bkg, ymax_bkg = get_minmax_range(hStackBkg.GetHists(),
-                                                  xmin, xmax)
-            ymin_ = min(ymin_sig, ymin_bkg)
-            ymax_ = max(ymax_sig, ymax_bkg)
-        elif hStackSig.GetNhists() == 0:
-            ymin_, ymax_ = get_minmax_range(hStackBkg.GetHists(), xmin, xmax)
-        elif hStackBkg.GetNhists() == 0:
-            ymin_, ymax_ = get_minmax_range(hStackSig.GetHists(), xmin, xmax)
+        hists_to_check = []
+        if hStackSig.GetNhists() > 0: 
+            hists_to_check.extend(hStackSig.GetHists())
+        if hStackBkg.GetNhists() > 0: 
+            hists_to_check.extend(hStackBkg.GetHists())
+        ymin_, ymax_ = get_minmax_range(hists_to_check, xmin, xmax)
+
     if ymin == -1:
         ymin = ymin_*0.1 if plot_params['yaxis'] == 'log' else 0
+        
     if ymax == -1:
-        ymax = ymax_*100. if plot_params['yaxis'] == 'log' else 1*ymax_
-    if plot_params['yaxis'] == 'log':
-        if ymin <= 0.:
-            LOGGER.error('Log scale for y-axis can\'t start at: %g\n'
-                         '  - plot name: %s\nContinuing...', ymin, plot_name)
-            return
-        if ymax <= 0.:
-            LOGGER.error('Log scale for y-axis can\'t end at: %g\n'
-                         '  - plot name: %s\nContinuing...', ymax, plot_name)
-            return
+        if plot_params['yaxis'] == 'log':
+            # Increase from 100 to something that fits your data better
+            # 50x is usually a good balance for log plots
+            ymax = ymax_ * 50. 
+        else:
+            ymax = 1.1 * ymax_ 
+
     h_dummy.SetMaximum(ymax)
     h_dummy.SetMinimum(ymin)
 
