@@ -3,7 +3,7 @@ import ROOT
 #Input directory where the files produced in the pre-selection stages are
 inputDir = "STAGE1_output"
 #Output directory where the resulting files will be stored
-outputDir = "FINAL_output"
+outputDir = "FINAL_output/Normalized"
 
 #Run over the full statistics from stage1 input file
 processList = {
@@ -29,6 +29,12 @@ processList = {
         'p8_ee_WW_ecm240':{},
 }
 
+#Need this block to add the cross sections of the self generated samples, otherwise it sets to 1.0 pb
+procDictAdd = {
+    'dark_photons_mZd360MeV_e_1e-5':      {"crossSection": 2.543e-06},
+    'dark_photons_mZd1100MeV_e_3.12e-6':  {"crossSection": 2.816e-06},
+    'dark_photons_mZd7000MeV_e_2.7e-7':   {"crossSection": 1.116e-06}
+}
 
 processLabels = {
     # #signals
@@ -58,6 +64,9 @@ intLumi = 10.8e+06  #pb-1
 
 #Whether to scale to expected integrated luminosity
 doScale = True
+
+#Scale to 1
+normalize  = True
 
 #Number of threads to use
 nCPUS = 4
