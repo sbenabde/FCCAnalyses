@@ -96,7 +96,7 @@ class Analysis():
             # 'wzp6_ee_qqH_Hmumu_ecm240':{'fraction':0.025},
             # 'wzp6_ee_ccH_Hmumu_ecm240':{'fraction':0.025},
             # 'wzp6_ee_bbH_Hmumu_ecm240':{'fraction':0.033},
-            # 'wzp6_ee_qqH_HZZ_llll_ecm240':{'fraction':0.083},
+            'wzp6_ee_qqH_HZZ_llll_ecm240':{'fraction':0.083},
             # 'wzp6_ee_qqH_HWW_ecm240':{'fraction':0.09},
             # 'wzp6_ee_ccH_HWW_ecm240':{'fraction':0.083},
             # 'wzp6_ee_bbH_HWW_ecm240':{'fraction':0.01},
@@ -104,7 +104,7 @@ class Analysis():
             
             #'wzp6_ee_bbH_HZZ_ecm240':{'fraction':0.01},
             #'p8_ee_ZZ_ecm240':{'fraction':0.01}
-            'p8_ee_WW_ecm240':{'fraction':0.01}
+            #'p8_ee_WW_ecm240':{'fraction':0.01}
         }
 
         self.prod_tag = 'FCCee/winter2023/IDEA/'
@@ -119,6 +119,7 @@ class Analysis():
         TTree_Branch_Name_parents = 'Particle#0'
         TTree_Branch_Name_daughters = 'Particle#1'
         TTree_Muon_Name = 'Muon#0'
+        TTree_Electron_Name = 'Electron#0'
         TTree_EflowTrack_Name = 'EFlowTrack_1'
             
         dframe2 = (
@@ -126,6 +127,7 @@ class Analysis():
             .Alias("Particle0", f"{TTree_Branch_Name_parents}.index")
             .Alias("Particle1", f"{TTree_Branch_Name_daughters}.index")
             .Alias('Muon0', f"{TTree_Muon_Name}.index")
+            .Alias('Electron0', f"{TTree_Electron_Name}.index")
             .Alias('EFlowTracks', f"{TTree_EflowTrack_Name}")
 
 #---------- Generated muons ------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -225,7 +227,31 @@ class Analysis():
 
             .Define("MuonPairs_InvMass", "sqrt(MuonPairs_e*MuonPairs_e - MuonPairs_px*MuonPairs_px - MuonPairs_py*MuonPairs_py - MuonPairs_pz*MuonPairs_pz)")
 
-   #---------- Vertexing  ------------------------------------------------------------------------------------------------------------------------------------------------------
+            .Define("Selected_muons",   "ReconstructedParticle::merge(MuonPair1, MuonPair2)")
+            .Define("N_Selected_muons", "int(Selected_muons.size())")
+
+#---------- Reconstructed electrons ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            .Define("RecoElectrons",        "ReconstructedParticle::get(Electron0, ReconstructedParticles)")
+            .Define("n_RecoElectrons",      "ReconstructedParticle::get_n(RecoElectrons)")                                   
+
+            .Define("RecoElectron_e",       "ReconstructedParticle::get_e(RecoElectrons)")
+            .Define("RecoElectron_p",       "ReconstructedParticle::get_p(RecoElectrons)")
+            .Define("RecoElectron_pt",      "ReconstructedParticle::get_pt(RecoElectrons)")
+            .Define("RecoElectron_px",      "ReconstructedParticle::get_px(RecoElectrons)")
+            .Define("RecoElectron_py",      "ReconstructedParticle::get_py(RecoElectrons)")
+            .Define("RecoElectron_pz",      "ReconstructedParticle::get_pz(RecoElectrons)")
+		    .Define("RecoElectron_eta",     "ReconstructedParticle::get_eta(RecoElectrons)")
+            .Define("RecoElectron_theta",   "ReconstructedParticle::get_theta(RecoElectrons)")
+		    .Define("RecoElectron_phi",     "ReconstructedParticle::get_phi(RecoElectrons)")
+            .Define("RecoElectron_charge",  "ReconstructedParticle::get_charge(RecoElectrons)")
+
+
+            .Define("Leptons",              "ReconstructedParticle::merge(RecoMuons, RecoElectrons)")
+            .Define("n_Leptons",            "int(Leptons.size())")
+
+
+#---------- Vertexing  ------------------------------------------------------------------------------------------------------------------------------------------------------
 
             # MC event primary vertex
             .Define("MC_PrimaryVertex",  "FCCAnalyses::MCParticle::get_EventPrimaryVertex(21)(Particle)" )
@@ -276,7 +302,9 @@ class Analysis():
             .Define("n_GlobalDVs",                  "int(RecoMuons_chi2 >= 0)")
 
 #---------- Jet Reconstruction ------------------------------------------------------------------------------------------------------------------------------------------------------
-            .Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, RecoMuons)")     #Particle collection without muons
+            #.Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, RecoMuons)")     #Particle collection without muons
+            .Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, Leptons)") #Particle collection without muons
+            #.Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, Selected_muons)")     #Particle collection without muons
 
             .Define("pseudo_jets_noMu",                                 #Jet clustering
                     "FCCAnalyses::JetClusteringUtils::set_pseudoJets("
@@ -286,6 +314,7 @@ class Analysis():
                     "ReconstructedParticle::get_e (RP_noMu))")      
 
             #ee_kt (Durham): clustering_ee_kt(exclusive (jet #), cut (same as exclusive if > 0), (0=sort by pT, 1=sort by E), recombination=0)
+            #.Define("clustered_durham2_noMu", "JetClustering::clustering_ee_kt(1, 10, 0, 0)(pseudo_jets_noMu)")
             .Define("clustered_durham2_noMu", "JetClustering::clustering_ee_kt(2, 2, 0, 0)(pseudo_jets_noMu)")
             .Define("jets_durham2_noMu",      "FCCAnalyses::JetClusteringUtils::get_pseudoJets(clustered_durham2_noMu)")
 
@@ -297,8 +326,8 @@ class Analysis():
             
             .Define("n_zjj",  "int(zjj_e.size())")
 
-            .Define("zjj_leading_pt",    "n_zjj > 0 ? float(zjj_pt.at(0)) : -1.0f")
-            .Define("zjj_subleading_pt", "n_zjj > 1 ? float(zjj_pt.at(1)) : -1.0f")
+            .Define("zjj_leading_pt", "if (zjj_pt.size() > 0) return float(zjj_pt.at(0)); else return float(-1.0);")            
+            .Define("zjj_subleading_pt", "if (zjj_pt.size() > 1) return float(zjj_pt.at(1)); else return float(-1.0);")
 
             #Leading+Subeading
             .Define("zjj_e_sum",  "if (n_zjj>1) return float(zjj_e.at(0)  + zjj_e.at(1));  else return float(-1.);")

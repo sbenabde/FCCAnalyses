@@ -3,7 +3,7 @@ import ROOT
 #Input directory where the files produced in the pre-selection stages are
 inputDir = "STAGE1_output"
 #Output directory where the resulting files will be stored
-outputDir = "FINAL_output/Normalized"
+outputDir = "FINAL_output"
 
 #Run over the full statistics from stage1 input file
 processList = {
@@ -14,16 +14,16 @@ processList = {
 
         #Background
         # 'wzp6_ee_mumuH_Hmumu_ecm240':{},
-        'wzp6_ee_qqH_Hmumu_ecm240':{},
-        'wzp6_ee_ccH_Hmumu_ecm240':{},
-        'wzp6_ee_bbH_Hmumu_ecm240':{},
+        # 'wzp6_ee_qqH_Hmumu_ecm240':{},
+        # 'wzp6_ee_ccH_Hmumu_ecm240':{},
+        # 'wzp6_ee_bbH_Hmumu_ecm240':{},
         'wzp6_ee_qqH_HZZ_llll_ecm240':{},
-        'wzp6_ee_qqH_HWW_ecm240':{},
-        'wzp6_ee_ccH_HWW_ecm240':{},
-        'wzp6_ee_bbH_HWW_ecm240':{},
-        'wzp6_ee_mumuH_Hbb_ecm240':{},
+        # 'wzp6_ee_qqH_HWW_ecm240':{},
+        # 'wzp6_ee_ccH_HWW_ecm240':{},
+        # 'wzp6_ee_bbH_HWW_ecm240':{},
+        # 'wzp6_ee_mumuH_Hbb_ecm240':{},
         
-        'wzp6_ee_bbH_HZZ_ecm240':{},
+        # 'wzp6_ee_bbH_HZZ_ecm240':{},
 
         'p8_ee_ZZ_ecm240':{},
         'p8_ee_WW_ecm240':{},
@@ -42,18 +42,18 @@ processLabels = {
     'dark_photons_mZd1100MeV_e_3.12e-6': r"m$_{Z_D}$=1100MeV, $\epsilon$=3.12*10$^{-6}$",
     'dark_photons_mZd7000MeV_e_8.8e-7':  r"m$_{Z_D}$=7000MeV, $\epsilon$=8.8*10$^{-7}$",
     #Backgrounds
-    'wzp6_ee_qqH_Hmumu_ecm240':     r"Z #\rightarrow qq, h #\rightarrow #mu #mu",
-    'wzp6_ee_ccH_Hmumu_ecm240':     r"Z #\rightarrow cc, h #\rightarrow #mu #mu",
-    'wzp6_ee_bbH_Hmumu_ecm240':     r"Z #\rightarrow bb, h #\rightarrow #mu #mu",
+    # 'wzp6_ee_qqH_Hmumu_ecm240':     r"Z #\rightarrow qq, h #\rightarrow #mu #mu",
+    # 'wzp6_ee_ccH_Hmumu_ecm240':     r"Z #\rightarrow cc, h #\rightarrow #mu #mu",
+    # 'wzp6_ee_bbH_Hmumu_ecm240':     r"Z #\rightarrow bb, h #\rightarrow #mu #mu",
     'wzp6_ee_qqH_HZZ_llll_ecm240':  r"Z #\rightarrow qq, h #\rightarrow ZZ #\rightarrow llll",
-    'wzp6_ee_qqH_HWW_ecm240':       r"Z #\rightarrow qq, h #\rightarrow WW",
-    'wzp6_ee_ccH_HWW_ecm240':       r"Z #\rightarrow cc, h #\rightarrow WW",
-    'wzp6_ee_bbH_HWW_ecm240':       r"Z #\rightarrow bb, h #\rightarrow WW",
-    'wzp6_ee_mumuH_Hbb_ecm240':     r"Z #\rightarrow #mu #mu, h #\rightarrow bb",
+    # 'wzp6_ee_qqH_HWW_ecm240':       r"Z #\rightarrow qq, h #\rightarrow WW",
+    # 'wzp6_ee_ccH_HWW_ecm240':       r"Z #\rightarrow cc, h #\rightarrow WW",
+    # 'wzp6_ee_bbH_HWW_ecm240':       r"Z #\rightarrow bb, h #\rightarrow WW",
+    # 'wzp6_ee_mumuH_Hbb_ecm240':     r"Z #\rightarrow #mu #mu, h #\rightarrow bb",
    
-    'wzp6_ee_bbH_HZZ_ecm240':       r"Z #\rightarrow bb, h #\rightarrow ZZ",
-    'p8_ee_ZZ_ecm240':              r"ee #\rightarrow ZZ",
-    'p8_ee_WW_ecm240':              r"ee #\rightarrow WW",
+    # 'wzp6_ee_bbH_HZZ_ecm240':       r"Z #\rightarrow bb, h #\rightarrow ZZ",
+    # 'p8_ee_ZZ_ecm240':              r"ee #\rightarrow ZZ",
+    # 'p8_ee_WW_ecm240':              r"ee #\rightarrow WW",
 }
 
 #Link to the dictionary that contains all the cross section information etc...
@@ -92,6 +92,7 @@ cuts = ['(n_zjj >= 2)',
 ]
 
 #Dictionary with the list of cuts. The key is the name of the selection that will be added to the output file
+#Try for presel exactly 2 jets
 cutList = {
     "selNone": "n_zjj >= 0",
     #For event selection
@@ -137,7 +138,7 @@ histoList = {
     'n_RecoMuons':                  {"name":'n_RecoMuons',               "title": "Number of reco. muons",                       "bin":10,  "xmin":-0.5,  "xmax":9.5},
     'RecoMuon_pt':                  {"name":'RecoMuon_pt',               "title": "Reco muons p_{T} [GeV]",                      "bin":100, "xmin":0,     "xmax":150},
 
-    'n_zjj':                        {"name":'n_zjj',                     "title": "Number of reco. jets",                        "bin":10,  "xmin":-0.5,  "xmax":9.5},    
+    'n_zjj':                        {"name":'n_zjj',                     "title": "Number of reco. jets",                        "bin":12,  "xmin":0,      "xmax":12},    
     'zjj_pt':                       {"name":'zjj_pt',                    "title": "Jets p_{T} [GeV]",                            "bin":100, "xmin":0,     "xmax":150},    
     'zjj_invMass':                  {"name":'zjj_invMass',               "title": "M_{jj} [GeV]",                                "bin":100, "xmin":50,     "xmax":150},     
     

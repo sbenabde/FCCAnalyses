@@ -107,6 +107,7 @@ class Analysis():
         TTree_Branch_Name_parents = '_Particle_parents'
         TTree_Branch_Name_daughters = '_Particle_daughters'
         TTree_Muon_Name = 'Muon_objIdx'
+        TTree_Electron_Name = 'Electron_objIdx'
         TTree_EflowTrack_Name = '_EFlowTrack_trackStates'
             
         dframe2 = (
@@ -114,6 +115,7 @@ class Analysis():
             .Alias("Particle0", f"{TTree_Branch_Name_parents}.index")
             .Alias("Particle1", f"{TTree_Branch_Name_daughters}.index")
             .Alias('Muon0', f"{TTree_Muon_Name}.index")
+            .Alias('Electron0', f"{TTree_Electron_Name}.index")
             .Alias('EFlowTracks', f"{TTree_EflowTrack_Name}")
 
 #---------- Generated muons ------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -217,6 +219,25 @@ class Analysis():
             .Define("N_Selected_muons", "int(Selected_muons.size())")
 
 
+#---------- Reconstructed electrons ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            .Define("RecoElectrons",        "ReconstructedParticle::get(Electron0, ReconstructedParticles)")
+            .Define("n_RecoElectrons",      "ReconstructedParticle::get_n(RecoElectrons)")                                   
+
+            .Define("RecoElectron_e",       "ReconstructedParticle::get_e(RecoElectrons)")
+            .Define("RecoElectron_p",       "ReconstructedParticle::get_p(RecoElectrons)")
+            .Define("RecoElectron_pt",      "ReconstructedParticle::get_pt(RecoElectrons)")
+            .Define("RecoElectron_px",      "ReconstructedParticle::get_px(RecoElectrons)")
+            .Define("RecoElectron_py",      "ReconstructedParticle::get_py(RecoElectrons)")
+            .Define("RecoElectron_pz",      "ReconstructedParticle::get_pz(RecoElectrons)")
+		    .Define("RecoElectron_eta",     "ReconstructedParticle::get_eta(RecoElectrons)")
+            .Define("RecoElectron_theta",   "ReconstructedParticle::get_theta(RecoElectrons)")
+		    .Define("RecoElectron_phi",     "ReconstructedParticle::get_phi(RecoElectrons)")
+            .Define("RecoElectron_charge",  "ReconstructedParticle::get_charge(RecoElectrons)")
+
+            .Define("Leptons",              "ReconstructedParticle::merge(RecoMuons, RecoElectrons)")
+            .Define("n_Leptons",            "int(Leptons.size())")
+
 
 #---------- Vertexing  ------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -272,7 +293,9 @@ class Analysis():
             .Define("n_total_tracks",         "EFlowTracks.size()")
 #---------- Jet Reconstruction ------------------------------------------------------------------------------------------------------------------------------------------------------
             
-            .Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, RecoMuons)") #Particle collection without muons
+            .Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, Leptons)") #Particle collection without muons
+            #.Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, RecoMuons)") #Particle collection without muons
+            #.Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, Selected_muons)") #Particle collection without muons
 
             .Define("pseudo_jets_noMu", #Jet clustering
                     "FCCAnalyses::JetClusteringUtils::set_pseudoJets("
@@ -281,11 +304,11 @@ class Analysis():
                     "ReconstructedParticle::get_pz(RP_noMu),"
                     "ReconstructedParticle::get_e (RP_noMu))")      
 
-            #ee_kt (Durham): clustering_ee_kt(exclusive (jet #), cut (same as exclusive if > 0), (0=sort by pT, 1=sort by E), recombination=0)
+            #ee_kt (Durham): clustering_ee_kt(inclusive (0) or exclusive (jet #), up to exaclty N jets for exclusive or ycut for inclusive, (0=sort by pT, 1=sort by E), recombination=0)
+            #.Define("clustered_durham2_noMu", "JetClustering::clustering_ee_kt(1, 10, 0, 0)(pseudo_jets_noMu)")
             .Define("clustered_durham2_noMu", "JetClustering::clustering_ee_kt(2, 2, 0, 0)(pseudo_jets_noMu)")
             .Define("jets_durham2_noMu",      "FCCAnalyses::JetClusteringUtils::get_pseudoJets(clustered_durham2_noMu)")
 
-            #All jets (actually there are only 2 so this is leading and subleading together)
             .Define("zjj_e",  "FCCAnalyses::JetClusteringUtils::get_e (jets_durham2_noMu)")
             .Define("zjj_px", "FCCAnalyses::JetClusteringUtils::get_px(jets_durham2_noMu)")
             .Define("zjj_py", "FCCAnalyses::JetClusteringUtils::get_py(jets_durham2_noMu)")
@@ -294,9 +317,9 @@ class Analysis():
             
             .Define("n_zjj",  "int(zjj_e.size())")
 
-            .Define("zjj_leading_pt",    "return float(zjj_pt.at(0))")
-            .Define("zjj_subleading_pt", "return float(zjj_pt.at(1))")
-            
+            .Define("zjj_leading_pt",    "if (zjj_pt.size() > 0) return float(zjj_pt.at(0)); else return float(-1.0);")            
+            .Define("zjj_subleading_pt", "if (zjj_pt.size() > 1) return float(zjj_pt.at(1)); else return float(-1.0);")
+
             .Define("zjj_e_sum",  "if (n_zjj>1) return float(zjj_e.at(0)  + zjj_e.at(1));  else return float(-1.);")
             .Define("zjj_px_sum", "if (n_zjj>1) return float(zjj_px.at(0) + zjj_px.at(1)); else return float(-1.);")
             .Define("zjj_py_sum", "if (n_zjj>1) return float(zjj_py.at(0) + zjj_py.at(1)); else return float(-1.);")

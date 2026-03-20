@@ -16,7 +16,7 @@ inputDir       = "FINAL_output/"
 formats        = ['png']
 yaxis          = ['lin','log']
 stacksig       = ['nostack']
-outdir         = 'PLOTS_output/Normalized/All_BG'
+outdir         = '/eos/user/s/sbenabde/PLOTS_output/Lumi/bbH_HZZ_llll'
 splitLeg       = False
 
 variables = ['n_RecoMuons',
@@ -38,6 +38,18 @@ variables = ['n_RecoMuons',
 
 #Dictionary with the list of selections to be plotted for this analysis. The name of the selections should be the same than in the final selection
 selections = {}
+selections['Lumi']  = [
+    "selNone",
+    "Preselection",
+    "Z-mass",
+    "Z-mass2",
+    "Z-mass3",
+    "Z-mass4",
+    "Full_selection",
+    "Full_selection2",
+    "Full_selection3",
+    "Full_selection4",
+]
 selections['Normalize']  = [
     "selNone",
     "Preselection",
@@ -65,25 +77,28 @@ extralabel['Full_selection4'] = r"Full Selection4"
 
 
 plots = {}
-plots['Normalize'] = {
+my_samples = {
       'signal':{'dark_photons_mZd360MeV_e_1e-5':['dark_photons_mZd360MeV_e_1e-5'],
                 'dark_photons_mZd1100MeV_e_3.12e-6':['dark_photons_mZd1100MeV_e_3.12e-6'],
                 'dark_photons_mZd7000MeV_e_2.7e-7':['dark_photons_mZd7000MeV_e_2.7e-7'],
                 },
-        'backgrounds':{ 'wzp6_ee_bbH_HZZ_ecm240':['wzp6_ee_bbH_HZZ_ecm240'],
-                        'wzp6_ee_qqH_Hmumu_ecm240':['wzp6_ee_qqH_Hmumu_ecm240'],
-                        'wzp6_ee_ccH_Hmumu_ecm240':['wzp6_ee_ccH_Hmumu_ecm240'],
-                        'wzp6_ee_bbH_Hmumu_ecm240':['wzp6_ee_bbH_Hmumu_ecm240'],
+        'backgrounds':{ #'wzp6_ee_bbH_HZZ_ecm240':['wzp6_ee_bbH_HZZ_ecm240'],
+                        # 'wzp6_ee_qqH_Hmumu_ecm240':['wzp6_ee_qqH_Hmumu_ecm240'],
+                        # 'wzp6_ee_ccH_Hmumu_ecm240':['wzp6_ee_ccH_Hmumu_ecm240'],
+                        # 'wzp6_ee_bbH_Hmumu_ecm240':['wzp6_ee_bbH_Hmumu_ecm240'],
                         'wzp6_ee_qqH_HZZ_llll_ecm240':['wzp6_ee_qqH_HZZ_llll_ecm240'],
-                        'wzp6_ee_qqH_HWW_ecm240':['wzp6_ee_qqH_HWW_ecm240'],
-                        'wzp6_ee_ccH_HWW_ecm240':['wzp6_ee_ccH_HWW_ecm240'],
-                        'wzp6_ee_bbH_HWW_ecm240':['wzp6_ee_bbH_HWW_ecm240'],
-                        'wzp6_ee_mumuH_Hbb_ecm240':['wzp6_ee_mumuH_Hbb_ecm240'],
-                        'p8_ee_ZZ_ecm240':['p8_ee_ZZ_ecm240'],
-                        'p8_ee_WW_ecm240':['p8_ee_WW_ecm240'],
+                        # 'wzp6_ee_qqH_HWW_ecm240':['wzp6_ee_qqH_HWW_ecm240'],
+                        # 'wzp6_ee_ccH_HWW_ecm240':['wzp6_ee_ccH_HWW_ecm240'],
+                        # 'wzp6_ee_bbH_HWW_ecm240':['wzp6_ee_bbH_HWW_ecm240'],
+                        # 'wzp6_ee_mumuH_Hbb_ecm240':['wzp6_ee_mumuH_Hbb_ecm240'],
+                        # 'p8_ee_ZZ_ecm240':['p8_ee_ZZ_ecm240'],
+                        # 'p8_ee_WW_ecm240':['p8_ee_WW_ecm240'],
 
-                }
+                },
+            'normalize': True
             }
+plots['Lumi'] = {**my_samples, 'normalize': False, 'ytitle': 'Events'}
+plots['Normalize'] = {**my_samples, 'normalize': True, 'ytitle': 'Normalized to 1'}
 
 linestyle = {}
 colors = {}
@@ -91,31 +106,31 @@ colors['dark_photons_mZd360MeV_e_1e-5'] = ROOT.kViolet+7
 colors['dark_photons_mZd1100MeV_e_3.12e-6'] = ROOT.kMagenta+3
 colors['dark_photons_mZd7000MeV_e_2.7e-7'] = ROOT.kPink+8
 
-colors['wzp6_ee_bbH_HZZ_ecm240'] = ROOT.kSpring+1
-colors['wzp6_ee_qqH_Hmumu_ecm240'] = ROOT.kRed-8
-colors['wzp6_ee_ccH_Hmumu_ecm240'] = ROOT.kRed-9
-colors['wzp6_ee_bbH_Hmumu_ecm240'] = ROOT.kRed-10
+# colors['wzp6_ee_bbH_HZZ_ecm240'] = ROOT.kSpring+1
+# colors['wzp6_ee_qqH_Hmumu_ecm240'] = ROOT.kRed-8
+# colors['wzp6_ee_ccH_Hmumu_ecm240'] = ROOT.kRed-9
+# colors['wzp6_ee_bbH_Hmumu_ecm240'] = ROOT.kRed-10
 colors['wzp6_ee_qqH_HZZ_llll_ecm240'] = ROOT.kOrange-9
-colors['wzp6_ee_qqH_HWW_ecm240'] = ROOT.kGreen-7
-colors['wzp6_ee_ccH_HWW_ecm240'] = ROOT.kGreen-8
-colors['wzp6_ee_bbH_HWW_ecm240'] = ROOT.kGreen-9
-colors['wzp6_ee_mumuH_Hbb_ecm240'] = ROOT.kBlue-10
-colors['p8_ee_ZZ_ecm240'] = ROOT.kMagenta-10
-colors['p8_ee_WW_ecm240'] = ROOT.kMagenta-9
+# colors['wzp6_ee_qqH_HWW_ecm240'] = ROOT.kGreen-7
+# colors['wzp6_ee_ccH_HWW_ecm240'] = ROOT.kGreen-8
+# colors['wzp6_ee_bbH_HWW_ecm240'] = ROOT.kGreen-9
+# colors['wzp6_ee_mumuH_Hbb_ecm240'] = ROOT.kBlue-10
+# colors['p8_ee_ZZ_ecm240'] = ROOT.kMagenta-10
+# colors['p8_ee_WW_ecm240'] = ROOT.kMagenta-9
 
 legend = {}
 legend['dark_photons_mZd360MeV_e_1e-5']     = '360MeV, 1#times10^{-5}'
 legend['dark_photons_mZd1100MeV_e_3.12e-6'] = '1100MeV, 3.12#times10^{-6}'
 legend['dark_photons_mZd7000MeV_e_2.7e-7']  = '7000MeV, 2.7#times10^{-7}'
 
-legend['wzp6_ee_bbH_HZZ_ecm240'] =       r"z #rightarrow bb, h #rightarrow ZZ"
-legend['wzp6_ee_qqH_Hmumu_ecm240'] =     r"z #rightarrow qq, h #rightarrow #mu #mu"
-legend['wzp6_ee_ccH_Hmumu_ecm240'] =     r"z #rightarrow cc, h #rightarrow #mu #mu"
-legend['wzp6_ee_bbH_Hmumu_ecm240'] =     r"z #rightarrow bb, h #rightarrow #mu #mu"
+# legend['wzp6_ee_bbH_HZZ_ecm240'] =       r"z #rightarrow bb, h #rightarrow ZZ"
+# legend['wzp6_ee_qqH_Hmumu_ecm240'] =     r"z #rightarrow qq, h #rightarrow #mu #mu"
+# legend['wzp6_ee_ccH_Hmumu_ecm240'] =     r"z #rightarrow cc, h #rightarrow #mu #mu"
+# legend['wzp6_ee_bbH_Hmumu_ecm240'] =     r"z #rightarrow bb, h #rightarrow #mu #mu"
 legend['wzp6_ee_qqH_HZZ_llll_ecm240'] =  r"z #rightarrow qq, h #rightarrow ZZ #rightarrow llll"
-legend['wzp6_ee_qqH_HWW_ecm240'] =       r"z #rightarrow qq, h #rightarrow WW"
-legend['wzp6_ee_ccH_HWW_ecm240'] =       r"z #rightarrow cc, h #rightarrow WW"
-legend['wzp6_ee_bbH_HWW_ecm240'] =       r"z #rightarrow bb, h #rightarrow WW"
-legend['wzp6_ee_mumuH_Hbb_ecm240'] =     r"z #rightarrow #mu #mu, h #rightarrow bb"
-legend['p8_ee_ZZ_ecm240'] =              r"e^{+}e^{-} #rightarrow ZZ"
-legend['p8_ee_WW_ecm240'] =              r"e^{+}e^{-} #rightarrow WW"
+# legend['wzp6_ee_qqH_HWW_ecm240'] =       r"z #rightarrow qq, h #rightarrow WW"
+# legend['wzp6_ee_ccH_HWW_ecm240'] =       r"z #rightarrow cc, h #rightarrow WW"
+# legend['wzp6_ee_bbH_HWW_ecm240'] =       r"z #rightarrow bb, h #rightarrow WW"
+# legend['wzp6_ee_mumuH_Hbb_ecm240'] =     r"z #rightarrow #mu #mu, h #rightarrow bb"
+# legend['p8_ee_ZZ_ecm240'] =              r"e^{+}e^{-} #rightarrow ZZ"
+# legend['p8_ee_WW_ecm240'] =              r"e^{+}e^{-} #rightarrow WW"
