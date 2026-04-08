@@ -16,7 +16,7 @@ inputDir       = "FINAL_output/"
 formats        = ['png']
 yaxis          = ['lin','log']
 stacksig       = ['nostack']
-outdir         = '/eos/user/s/sbenabde/PLOTS_output/Lumi/bbH_HZZ_llll'
+outdir         = '/eos/user/s/sbenabde/PLOTS_output/bbH_HZZ_llll'
 splitLeg       = False
 
 variables = ['n_RecoMuons',
@@ -27,6 +27,8 @@ variables = ['n_RecoMuons',
             'zjj_leading_pt',
             'zjj_subleading_pt',
             'zjj_invMass',
+            'n_gen_Z',
+            'GenZ_InvM',
 
             'MuonPairs_InvMass',
             "MuonPair1_dR",
@@ -41,26 +43,26 @@ selections = {}
 selections['Lumi']  = [
     "selNone",
     "Preselection",
-    "Z-mass",
-    "Z-mass2",
-    "Z-mass3",
-    "Z-mass4",
-    "Full_selection",
-    "Full_selection2",
-    "Full_selection3",
-    "Full_selection4",
+    # "Z-mass",
+    # "Z-mass2",
+    # "Z-mass3",
+    # "Z-mass4",
+    # "Full_selection",
+    # "Full_selection2",
+    # "Full_selection3",
+    # "Full_selection4",
 ]
 selections['Normalize']  = [
     "selNone",
     "Preselection",
-    "Z-mass",
-    "Z-mass2",
-    "Z-mass3",
-    "Z-mass4",
-    "Full_selection",
-    "Full_selection2",
-    "Full_selection3",
-    "Full_selection4",
+    # "Z-mass",
+    # "Z-mass2",
+    # "Z-mass3",
+    # "Z-mass4",
+    # "Full_selection",
+    # "Full_selection2",
+    # "Full_selection3",
+    # "Full_selection4",
 ]
 
 extralabel = {}
@@ -86,7 +88,9 @@ my_samples = {
                         # 'wzp6_ee_qqH_Hmumu_ecm240':['wzp6_ee_qqH_Hmumu_ecm240'],
                         # 'wzp6_ee_ccH_Hmumu_ecm240':['wzp6_ee_ccH_Hmumu_ecm240'],
                         # 'wzp6_ee_bbH_Hmumu_ecm240':['wzp6_ee_bbH_Hmumu_ecm240'],
+                        # 'bkg_ee_qqH_HZZ_llll':['bkg_ee_qqH_HZZ_llll'],
                         'wzp6_ee_qqH_HZZ_llll_ecm240':['wzp6_ee_qqH_HZZ_llll_ecm240'],
+                        #'wzp6_ee_qqH_ecm240':['wzp6_ee_qqH_ecm240'],
                         # 'wzp6_ee_qqH_HWW_ecm240':['wzp6_ee_qqH_HWW_ecm240'],
                         # 'wzp6_ee_ccH_HWW_ecm240':['wzp6_ee_ccH_HWW_ecm240'],
                         # 'wzp6_ee_bbH_HWW_ecm240':['wzp6_ee_bbH_HWW_ecm240'],
@@ -106,28 +110,34 @@ colors['dark_photons_mZd360MeV_e_1e-5'] = ROOT.kViolet+7
 colors['dark_photons_mZd1100MeV_e_3.12e-6'] = ROOT.kMagenta+3
 colors['dark_photons_mZd7000MeV_e_2.7e-7'] = ROOT.kPink+8
 
-# colors['wzp6_ee_bbH_HZZ_ecm240'] = ROOT.kSpring+1
+colors['bkg_ee_qqH_HZZ_llll'] = ROOT.kPink+1
+
+#colors['wzp6_ee_bbH_HZZ_ecm240'] = ROOT.kSpring+1
+#colors['wzp6_ee_qqH_ecm240'] = ROOT.kPink+1
 # colors['wzp6_ee_qqH_Hmumu_ecm240'] = ROOT.kRed-8
 # colors['wzp6_ee_ccH_Hmumu_ecm240'] = ROOT.kRed-9
 # colors['wzp6_ee_bbH_Hmumu_ecm240'] = ROOT.kRed-10
-colors['wzp6_ee_qqH_HZZ_llll_ecm240'] = ROOT.kOrange-9
+colors['wzp6_ee_qqH_HZZ_llll_ecm240'] = ROOT.kMagenta-10
 # colors['wzp6_ee_qqH_HWW_ecm240'] = ROOT.kGreen-7
 # colors['wzp6_ee_ccH_HWW_ecm240'] = ROOT.kGreen-8
 # colors['wzp6_ee_bbH_HWW_ecm240'] = ROOT.kGreen-9
 # colors['wzp6_ee_mumuH_Hbb_ecm240'] = ROOT.kBlue-10
-# colors['p8_ee_ZZ_ecm240'] = ROOT.kMagenta-10
-# colors['p8_ee_WW_ecm240'] = ROOT.kMagenta-9
+# colors['p8_ee_ZZ_ecm240'] = ROOT.kOrange-10
+# colors['p8_ee_WW_ecm240'] = ROOT.kOrange-9
 
 legend = {}
 legend['dark_photons_mZd360MeV_e_1e-5']     = '360MeV, 1#times10^{-5}'
 legend['dark_photons_mZd1100MeV_e_3.12e-6'] = '1100MeV, 3.12#times10^{-6}'
 legend['dark_photons_mZd7000MeV_e_2.7e-7']  = '7000MeV, 2.7#times10^{-7}'
 
-# legend['wzp6_ee_bbH_HZZ_ecm240'] =       r"z #rightarrow bb, h #rightarrow ZZ"
-# legend['wzp6_ee_qqH_Hmumu_ecm240'] =     r"z #rightarrow qq, h #rightarrow #mu #mu"
-# legend['wzp6_ee_ccH_Hmumu_ecm240'] =     r"z #rightarrow cc, h #rightarrow #mu #mu"
-# legend['wzp6_ee_bbH_Hmumu_ecm240'] =     r"z #rightarrow bb, h #rightarrow #mu #mu"
-legend['wzp6_ee_qqH_HZZ_llll_ecm240'] =  r"z #rightarrow qq, h #rightarrow ZZ #rightarrow llll"
+legend['bkg_ee_qqH_HZZ_llll'] =  r"Z #rightarrow qq, h #rightarrow ZZ #rightarrow llll self"
+
+#legend['wzp6_ee_bbH_HZZ_ecm240'] =       r"Z #rightarrow bb, h #rightarrow ZZ"
+#legend['wzp6_ee_qqH_ecm240'] =           r"e^{+}e^{-} #rightarrow Zh, Z #rightarrow qq"
+#legend['wzp6_ee_qqH_Hmumu_ecm240'] =     r"z #rightarrow qq, h #rightarrow #mu #mu"
+#legend['wzp6_ee_ccH_Hmumu_ecm240'] =     r"z #rightarrow cc, h #rightarrow #mu #mu"
+#legend['wzp6_ee_bbH_Hmumu_ecm240'] =     r"z #rightarrow bb, h #rightarrow #mu #mu"
+legend['wzp6_ee_qqH_HZZ_llll_ecm240'] =  r"Z #rightarrow qq, h #rightarrow ZZ #rightarrow llll"
 # legend['wzp6_ee_qqH_HWW_ecm240'] =       r"z #rightarrow qq, h #rightarrow WW"
 # legend['wzp6_ee_ccH_HWW_ecm240'] =       r"z #rightarrow cc, h #rightarrow WW"
 # legend['wzp6_ee_bbH_HWW_ecm240'] =       r"z #rightarrow bb, h #rightarrow WW"

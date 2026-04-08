@@ -1,5 +1,7 @@
 from argparse import ArgumentParser
 import ROOT
+import copy
+from addons.FastJet.jetClusteringHelper import ExclusiveJetClusteringHelper
 
 ROOT.gInterpreter.Declare("""
 #include <vector>
@@ -94,8 +96,10 @@ class Analysis():
             'dark_photons_mZd360MeV_e_1e-5':{},
             'dark_photons_mZd1100MeV_e_3.12e-6':{},
             'dark_photons_mZd7000MeV_e_2.7e-7':{},
+            'bkg_ee_qqH_HZZ_llll':{},
         }
-        self.input_dir = '/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons'
+        # self.input_dir = '/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons'
+        self.input_dir = '/eos/user/s/sbenabde/MG5_aMC_v3_5_11/Root_files_HAHM/'
         self.output_dir = "STAGE1_output"
         
         self.analysis_name = 'My Analysis'
@@ -148,7 +152,16 @@ class Analysis():
             .Define("FSGen_Lxy",   "return sqrt(FSGenMuon_vertex_x*FSGenMuon_vertex_x + FSGenMuon_vertex_y*FSGenMuon_vertex_y)")
             .Define("FSGen_Lxyz",  "return sqrt(FSGenMuon_vertex_x*FSGenMuon_vertex_x + FSGenMuon_vertex_y*FSGenMuon_vertex_y + FSGenMuon_vertex_z*FSGenMuon_vertex_z)")
             
-   
+#---------- Generated Z ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            .Define("GenZ_PID",           "FCCAnalyses::MCParticle::sel_pdgID(23, true)(Particle)") #Keep particle only if its a Z boson
+            .Define("n_gen_Z",            "GenZ_PID.size()")
+            .Define("GenZ_e",             "if (n_gen_Z>0) return FCCAnalyses::MCParticle::get_e(GenZ_PID); else return FCCAnalyses::MCParticle::get_genStatus(GenZ_PID);")
+            .Define("GenZ_px",            "if (n_gen_Z>0) return FCCAnalyses::MCParticle::get_px(GenZ_PID); else return FCCAnalyses::MCParticle::get_genStatus(GenZ_PID);")
+            .Define("GenZ_py",            "if (n_gen_Z>0) return FCCAnalyses::MCParticle::get_py(GenZ_PID); else return FCCAnalyses::MCParticle::get_genStatus(GenZ_PID);")
+            .Define("GenZ_pz",            "if (n_gen_Z>0) return FCCAnalyses::MCParticle::get_pz(GenZ_PID); else return FCCAnalyses::MCParticle::get_genStatus(GenZ_PID);")
+            .Define("GenZ_InvM",          "if (n_gen_Z>0) return FCCAnalyses::MCParticle::get_mass(GenZ_PID); else return FCCAnalyses::MCParticle::get_genStatus(GenZ_PID);")
+
 #---------- Reconstructed muons ------------------------------------------------------------------------------------------------------------------------------------------------------
 
             .Define("RecoMuons",        "ReconstructedParticle::get(Muon0, ReconstructedParticles)")
@@ -241,7 +254,6 @@ class Analysis():
 
 #---------- Vertexing  ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
             # MC event primary vertex
             .Define("MC_PrimaryVertex",      "FCCAnalyses::MCParticle::get_EventPrimaryVertex(21)(Particle)" ) #21 is the PDG ID of the collision point, at coo (0,0,0)
             .Define("n_tracks",              "ReconstructedParticle2Track::getTK_n(EFlowTracks)")    #number of tracks
@@ -290,48 +302,89 @@ class Analysis():
             # .Define("Global_mass",                  "if(RecoMuons.size() >= 2) return ReconstructedParticle::get_invariant_mass(RecoMuons); else return -1.0;")
 
 
-            .Define("n_total_tracks",         "EFlowTracks.size()")
+            .Define("n_total_tracks",               "EFlowTracks.size()")
 #---------- Jet Reconstruction ------------------------------------------------------------------------------------------------------------------------------------------------------
+            .Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, Leptons)")
+        )
+
+        jetClusteringHelper = ExclusiveJetClusteringHelper("RP_noMu", 2, "N2")
+        dframe2 = jetClusteringHelper.define(dframe2)            
+
+        dframe2 = (
+            dframe2
+            # Use the helper's internal name directly
+            .Define("jets_p4", f"JetConstituentsUtils::compute_tlv_jets({jetClusteringHelper.jets})")
             
-            .Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, Leptons)") #Particle collection without muons
-            #.Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, RecoMuons)") #Particle collection without muons
-            #.Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, Selected_muons)") #Particle collection without muons
-
-            .Define("pseudo_jets_noMu", #Jet clustering
-                    "FCCAnalyses::JetClusteringUtils::set_pseudoJets("
-                    "ReconstructedParticle::get_px(RP_noMu),"
-                    "ReconstructedParticle::get_py(RP_noMu),"
-                    "ReconstructedParticle::get_pz(RP_noMu),"
-                    "ReconstructedParticle::get_e (RP_noMu))")      
-
-            #ee_kt (Durham): clustering_ee_kt(inclusive (0) or exclusive (jet #), up to exaclty N jets for exclusive or ycut for inclusive, (0=sort by pT, 1=sort by E), recombination=0)
-            #.Define("clustered_durham2_noMu", "JetClustering::clustering_ee_kt(1, 10, 0, 0)(pseudo_jets_noMu)")
-            .Define("clustered_durham2_noMu", "JetClustering::clustering_ee_kt(2, 2, 0, 0)(pseudo_jets_noMu)")
-            .Define("jets_durham2_noMu",      "FCCAnalyses::JetClusteringUtils::get_pseudoJets(clustered_durham2_noMu)")
-
-            .Define("zjj_e",  "FCCAnalyses::JetClusteringUtils::get_e (jets_durham2_noMu)")
-            .Define("zjj_px", "FCCAnalyses::JetClusteringUtils::get_px(jets_durham2_noMu)")
-            .Define("zjj_py", "FCCAnalyses::JetClusteringUtils::get_py(jets_durham2_noMu)")
-            .Define("zjj_pz", "FCCAnalyses::JetClusteringUtils::get_pz(jets_durham2_noMu)")
-            .Define("zjj_pt", "return sqrt(zjj_px*zjj_px + zjj_py*zjj_py);")
+            # Use explicit RVec<float> return types to satisfy the compiler
+            .Define("zjj_pt",  "ROOT::VecOps::RVec<float> res; for(auto& v: jets_p4) res.push_back(v.Pt()); return res;")
+            .Define("zjj_e",   "ROOT::VecOps::RVec<float> res; for(auto& v: jets_p4) res.push_back(v.E()); return res;")
+            .Define("zjj_px",  "ROOT::VecOps::RVec<float> res; for(auto& v: jets_p4) res.push_back(v.Px()); return res;")
+            .Define("zjj_py",  "ROOT::VecOps::RVec<float> res; for(auto& v: jets_p4) res.push_back(v.Py()); return res;")
+            .Define("zjj_pz",  "ROOT::VecOps::RVec<float> res; for(auto& v: jets_p4) res.push_back(v.Pz()); return res;")
             
-            .Define("n_zjj",  "int(zjj_e.size())")
-
-            .Define("zjj_leading_pt",    "if (zjj_pt.size() > 0) return float(zjj_pt.at(0)); else return float(-1.0);")            
-            .Define("zjj_subleading_pt", "if (zjj_pt.size() > 1) return float(zjj_pt.at(1)); else return float(-1.0);")
-
-            .Define("zjj_e_sum",  "if (n_zjj>1) return float(zjj_e.at(0)  + zjj_e.at(1));  else return float(-1.);")
-            .Define("zjj_px_sum", "if (n_zjj>1) return float(zjj_px.at(0) + zjj_px.at(1)); else return float(-1.);")
-            .Define("zjj_py_sum", "if (n_zjj>1) return float(zjj_py.at(0) + zjj_py.at(1)); else return float(-1.);")
-            .Define("zjj_pz_sum", "if (n_zjj>1) return float(zjj_pz.at(0) + zjj_pz.at(1)); else return float(-1.);")
-            .Define("zjj_pt_sum", "if (n_zjj>1) return float(sqrt((zjj_px_sum*zjj_px_sum) + (zjj_py_sum*zjj_py_sum))); else return float(-1.);")           
-
-            .Define("zjj_invMass",
-                    "if (n_zjj>1) return float(sqrt(zjj_e_sum*zjj_e_sum"
-                    " - zjj_px_sum*zjj_px_sum - zjj_py_sum*zjj_py_sum - zjj_pz_sum*zjj_pz_sum));"
-                    " else return float(-1.);")
+            .Define("n_zjj",   "int(jets_p4.size())")
+            
+            # Calculate Mass (cast to float immediately)
+            .Define("zjj_invMass", "n_zjj >= 2 ? (float)((jets_p4[0] + jets_p4[1]).M()) : -1.0f")
+            
+            # Now that zjj_pt is explicitly an RVec<float>, Argsort should work
+            .Define("zjj_sort_idx",  "ROOT::VecOps::Reverse(ROOT::VecOps::Argsort(zjj_pt))")
+            .Define("zjj_pt_sorted", "ROOT::VecOps::Take(zjj_pt, zjj_sort_idx)")
+            .Define("zjj_leading_pt",    "n_zjj > 0 ? zjj_pt_sorted[0] : -1.0f")
+            .Define("zjj_subleading_pt", "n_zjj > 1 ? zjj_pt_sorted[1] : -1.0f")
         )
         return dframe2
+ 
+        #     .Define("pseudo_jets_noMu", #Jet clustering
+        #             "FCCAnalyses::JetClusteringUtils::set_pseudoJets("
+        #             "ReconstructedParticle::get_px(RP_noMu),"
+        #             "ReconstructedParticle::get_py(RP_noMu),"
+        #             "ReconstructedParticle::get_pz(RP_noMu),"
+        #             "ReconstructedParticle::get_e (RP_noMu))")        
+
+        #     #ee_kt (Durham): clustering_ee_kt(inclusive (0) or exclusive (jet #), up to exaclty N jets for exclusive or ycut for inclusive, (0=sort by pT, 1=sort by E), recombination=0)
+        #     .Define("clustered_durham2_noMu", "JetClustering::clustering_ee_kt(2, 2, 0, 0)(pseudo_jets_noMu)")
+        #     .Define("jets_durham2_noMu",      "FCCAnalyses::JetClusteringUtils::get_pseudoJets(clustered_durham2_noMu)")
+
+        #     .Define("zjj_e",  "FCCAnalyses::JetClusteringUtils::get_e (jets_durham2_noMu)")
+        #     .Define("zjj_px", "FCCAnalyses::JetClusteringUtils::get_px(jets_durham2_noMu)")
+        #     .Define("zjj_py", "FCCAnalyses::JetClusteringUtils::get_py(jets_durham2_noMu)")
+        #     .Define("zjj_pz", "FCCAnalyses::JetClusteringUtils::get_pz(jets_durham2_noMu)")
+        #     .Define("zjj_pt", "return sqrt(zjj_px*zjj_px + zjj_py*zjj_py);")
+
+        #     .Define("n_zjj",  "int(zjj_e.size())")
+
+        #     #Invariant mass of all the jets
+        #     .Define("zjj_total_e",  "ROOT::VecOps::Sum(zjj_e)")
+        #     .Define("zjj_total_px", "ROOT::VecOps::Sum(zjj_px)")
+        #     .Define("zjj_total_py", "ROOT::VecOps::Sum(zjj_py)")
+        #     .Define("zjj_total_pz", "ROOT::VecOps::Sum(zjj_pz)")
+        #     .Define("zjj_total_pt", "ROOT::VecOps::Sum(zjj_pt)")
+        #     .Define("zjj_invMass_total","if (n_zjj>=2) return float(sqrt(zjj_total_e*zjj_total_e - (zjj_total_px*zjj_total_px + zjj_total_py*zjj_total_py + zjj_total_pz*zjj_total_pz))); else return float(-1.);")
+            
+        #     #Sorting manually to decreasing pT
+        #     .Define("zjj_sort_idx",  "ROOT::VecOps::Reverse(ROOT::VecOps::Argsort(zjj_pt))")
+        #     .Define("zjj_e_sorted",  "ROOT::VecOps::Take(zjj_e,  zjj_sort_idx)")
+        #     .Define("zjj_px_sorted", "ROOT::VecOps::Take(zjj_px, zjj_sort_idx)")
+        #     .Define("zjj_py_sorted", "ROOT::VecOps::Take(zjj_py, zjj_sort_idx)")
+        #     .Define("zjj_pz_sorted", "ROOT::VecOps::Take(zjj_pz, zjj_sort_idx)")
+        #     .Define("zjj_pt_sorted", "ROOT::VecOps::Take(zjj_pt, zjj_sort_idx)")
+
+        #     .Define("zjj_leading_pt",    "if (n_zjj > 0) return zjj_pt_sorted[0]; else return float(-1.0);")
+        #     .Define("zjj_subleading_pt", "if (n_zjj > 1) return zjj_pt_sorted[1]; else return float(-1.0);")
+
+        #     # .Define("zjj_leading_pt",    "if (zjj_pt.size() > 0) return float(zjj_pt.at(0)); else return float(-1.0);")            
+        #     # .Define("zjj_subleading_pt", "if (zjj_pt.size() > 1) return float(zjj_pt.at(1)); else return float(-1.0);")
+
+        #     .Define("zjj_e_sum",  "if (n_zjj>=2) return float(zjj_e.at(0)  + zjj_e.at(1));  else return float(-1.);")
+        #     .Define("zjj_px_sum", "if (n_zjj>=2) return float(zjj_px.at(0) + zjj_px.at(1)); else return float(-1.);")
+        #     .Define("zjj_py_sum", "if (n_zjj>=2) return float(zjj_py.at(0) + zjj_py.at(1)); else return float(-1.);")
+        #     .Define("zjj_pz_sum", "if (n_zjj>=2) return float(zjj_pz.at(0) + zjj_pz.at(1)); else return float(-1.);")
+        #     .Define("zjj_pt_sum", "if (n_zjj>=2) return float(sqrt((zjj_px_sum*zjj_px_sum) + (zjj_py_sum*zjj_py_sum))); else return float(-1.);")           
+
+        #     .Define("zjj_invMass","if (n_zjj>=2) return float(sqrt(zjj_e_sum*zjj_e_sum - (zjj_px_sum*zjj_px_sum + zjj_py_sum*zjj_py_sum + zjj_pz_sum*zjj_pz_sum))); else return float(-1.);")
+        # )
+        # return dframe2
 
     #Mandatory: output function, please make sure you return the branch list as a python list
     def output(self):
@@ -358,6 +411,8 @@ class Analysis():
             # "MC_M1_idx",
             # "MC_M1_part",
             # "MC_M1_pdg",
+            'n_gen_Z',
+            'GenZ_InvM',
 
             #Reco Muons
             "n_RecoMuons",
@@ -394,6 +449,7 @@ class Analysis():
             'zjj_py',
             'zjj_pz',
             'zjj_invMass',
+            # 'zjj_invMass_individual'
             'zjj_leading_pt',
             'zjj_subleading_pt',
 
@@ -408,7 +464,6 @@ class Analysis():
             # 'n_GlobalDVs',
             # 'SecondaryVertex_Lxyz',
             # 'PrimaryVertexSize',
-            'n_total_tracks',
 
         ]
         return branch_list
