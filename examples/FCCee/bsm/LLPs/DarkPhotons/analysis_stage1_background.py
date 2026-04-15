@@ -12,7 +12,7 @@ std::vector<std::vector<int>> get_best_paired_indices(ROOT::VecOps::RVec<float> 
                                                      ROOT::VecOps::RVec<float> phi, 
                                                      ROOT::VecOps::RVec<float> charge){
     std::vector<std::vector<int>> all_pairs;
-    if (eta.size() < 4) return all_pairs;         //Need at least 4 muons to produce 2 pairs
+    if (eta.size() < 2) return all_pairs;         //Need at least 4 muons to produce 2 pairs
 
     std::vector<bool> used(eta.size(), false);
 
@@ -85,6 +85,7 @@ double get_pair_dR(std::vector<int> pair_indices,
 
     return std::sqrt(D_eta * D_eta + D_phi * D_phi);
 }
+
 """)
 
 #Mandatory: Analysis class where the user defines the operations on the dataframe
@@ -93,21 +94,26 @@ class Analysis():
     def __init__(self, cmdline_args):
         
         self.process_list = {
-            #'wzp6_ee_mumuH_Hmumu_ecm240':{'fraction':0.025},
-
-            # 'wzp6_ee_qqH_Hmumu_ecm240':{'fraction':0.025},
-            # 'wzp6_ee_ccH_Hmumu_ecm240':{'fraction':0.025},
-            # 'wzp6_ee_bbH_Hmumu_ecm240':{'fraction':0.033},
-            'wzp6_ee_qqH_HZZ_llll_ecm240':{'fraction':0.083},
-            # 'wzp6_ee_qqH_HWW_ecm240':{'fraction':0.09},
-            # 'wzp6_ee_ccH_HWW_ecm240':{'fraction':0.083},
-            # 'wzp6_ee_bbH_HWW_ecm240':{'fraction':0.01},
-            # 'wzp6_ee_mumuH_Hbb_ecm240':{'fraction':0.033},
-            
+            #'wzp6_ee_qqH_HZZ_ecm240':{'fraction':0.025},
             #'wzp6_ee_bbH_HZZ_ecm240':{'fraction':0.01},
             #'wzp6_ee_qqH_ecm240':{'fraction':0.01},
-            #'p8_ee_ZZ_ecm240':{'fraction':0.01}
-            #'p8_ee_WW_ecm240':{'fraction':0.01}
+
+            #'wzp6_ee_mumuH_Hmumu_ecm240':{'fraction':0.025},
+
+            #'wzp6_ee_qqH_Hmumu_ecm240':{'fraction':0.025},
+            #'wzp6_ee_ccH_Hmumu_ecm240':{'fraction':0.025},
+            #'wzp6_ee_bbH_Hmumu_ecm240':{'fraction':0.033},
+
+            'wzp6_ee_qqH_HZZ_llll_ecm240':{'fraction':0.083},
+
+            #'wzp6_ee_qqH_HWW_ecm240':{'fraction':0.09},
+            #'wzp6_ee_ccH_HWW_ecm240':{'fraction':0.083},
+            #'wzp6_ee_bbH_HWW_ecm240':{'fraction':0.01},
+
+            #'wzp6_ee_mumuH_Hbb_ecm240':{'fraction':0.033},
+            
+            #'p8_ee_ZZ_ecm240':{'fraction':0.01},
+            #'p8_ee_WW_ecm240':{'fraction':0.01},
         }
 
         self.prod_tag = 'FCCee/winter2023/IDEA/'
@@ -117,6 +123,7 @@ class Analysis():
         self.n_threads = 1
 
 
+
     def analyzers(self, dframe):
 
         TTree_Branch_Name_parents = 'Particle#0'
@@ -124,6 +131,8 @@ class Analysis():
         TTree_Muon_Name = 'Muon#0'
         TTree_Electron_Name = 'Electron#0'
         TTree_EflowTrack_Name = 'EFlowTrack_1'
+        TTree_MCRecoAssociations0 = 'MCRecoAssociations#0'
+        TTree_MCRecoAssociations1 = 'MCRecoAssociations#1'
             
         dframe2 = (
             dframe
@@ -132,47 +141,8 @@ class Analysis():
             .Alias('Muon0', f"{TTree_Muon_Name}.index")
             .Alias('Electron0', f"{TTree_Electron_Name}.index")
             .Alias('EFlowTracks', f"{TTree_EflowTrack_Name}")
-
-#---------- Generated muons ------------------------------------------------------------------------------------------------------------------------------------------------------
-            # .Define("GenMuon_PID",        "FCCAnalyses::MCParticle::sel_pdgID(13, true)(Particle)") #Keep particle only if its a muon
-            # .Define("FSGenMuon",          "FCCAnalyses::MCParticle::sel_genStatus(1)(GenMuon_PID)") #Keep muon only if its final state (FS)
-            
-            # .Define("MC_PDG",             "FCCAnalyses::MCParticle::get_pdg(FSGenMuon)")            #Gets PDGID of particle collection in bracket
-            # .Define("MC_n",               "int(MC_PDG.size())")
-            # .Define("MC_M1_idx",          "myUtils::get_MCMother1(FSGenMuon, Particle0)")
-            # .Define("MC_M1_part",         "ROOT::VecOps::Take(Particle, MC_M1_idx)")                #mother particles
-            # .Define("MC_M1_pdg",          "FCCAnalyses::MCParticle::get_pdg(MC_M1_part)")
-
-            # .Define("n_FSGenMuon",        "FCCAnalyses::MCParticle::get_n(FSGenMuon)")              #Get number of final state generated muons
-            # .Define("FSGenMuon_e",        "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_e(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            # .Define("FSGenMuon_p",        "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_p(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-
-            # .Define("FSGenMuon_pt",       "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_pt(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            # .Define("FSGenMuon_px",       "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_px(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            # .Define("FSGenMuon_py",       "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_py(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            # .Define("FSGenMuon_pz",       "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_pz(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            # .Define("FSGenMuon_eta",      "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_eta(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            # .Define("FSGenMuon_theta",    "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_theta(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            # .Define("FSGenMuon_phi",      "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_phi(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            # .Define("FSGenMuon_charge",   "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_charge(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-        
-            # .Define("FSGenMuon_vertex_x", "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_vertex_x(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            # .Define("FSGenMuon_vertex_y", "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_vertex_y(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-            # .Define("FSGenMuon_vertex_z", "if (n_FSGenMuon>0) return FCCAnalyses::MCParticle::get_vertex_z(FSGenMuon); else return FCCAnalyses::MCParticle::get_genStatus(GenMuon_PID);")
-           
-            # .Define("FSGen_Lxy",   "return sqrt(FSGenMuon_vertex_x*FSGenMuon_vertex_x + FSGenMuon_vertex_y*FSGenMuon_vertex_y)")
-            # .Define("FSGen_Lxyz",  "return sqrt(FSGenMuon_vertex_x*FSGenMuon_vertex_x + FSGenMuon_vertex_y*FSGenMuon_vertex_y + FSGenMuon_vertex_z*FSGenMuon_vertex_z)")
-            
-        
-#---------- Generated Z ------------------------------------------------------------------------------------------------------------------------------------------------------
-
-            .Define("GenZ_PID",           "FCCAnalyses::MCParticle::sel_pdgID(23, true)(Particle)") #Keep particle only if its a Z boson
-            .Define("n_gen_Z",            "GenZ_PID.size()")
-            .Define("GenZ_e",             "if (n_gen_Z>0) return FCCAnalyses::MCParticle::get_e(GenZ_PID); else return FCCAnalyses::MCParticle::get_genStatus(GenZ_PID);")
-            .Define("GenZ_px",            "if (n_gen_Z>0) return FCCAnalyses::MCParticle::get_px(GenZ_PID); else return FCCAnalyses::MCParticle::get_genStatus(GenZ_PID);")
-            .Define("GenZ_py",            "if (n_gen_Z>0) return FCCAnalyses::MCParticle::get_py(GenZ_PID); else return FCCAnalyses::MCParticle::get_genStatus(GenZ_PID);")
-            .Define("GenZ_pz",            "if (n_gen_Z>0) return FCCAnalyses::MCParticle::get_pz(GenZ_PID); else return FCCAnalyses::MCParticle::get_genStatus(GenZ_PID);")
-            .Define("GenZ_InvM",          "if (n_gen_Z>0) return FCCAnalyses::MCParticle::get_mass(GenZ_PID); else return FCCAnalyses::MCParticle::get_genStatus(GenZ_PID);")
+            .Alias("MCRecoAssociations0", f"{TTree_MCRecoAssociations0}.index")
+            .Alias("MCRecoAssociations1", f"{TTree_MCRecoAssociations1}.index")
 
 #---------- Reconstructed muons ------------------------------------------------------------------------------------------------------------------------------------------------------
             .Define("RecoMuons",        "ReconstructedParticle::get(Muon0, ReconstructedParticles)")
@@ -189,12 +159,14 @@ class Analysis():
 		    .Define("RecoMuon_phi",     "ReconstructedParticle::get_phi(RecoMuons)")
             .Define("RecoMuon_charge",  "ReconstructedParticle::get_charge(RecoMuons)")
 
-             #Muon pairs for DP reconstruction           
-            .Define('PairedMuons', 'get_best_paired_indices(RecoMuon_eta, RecoMuon_phi, RecoMuon_charge)')
-            .Define('Pair1', 'PairedMuons.size() > 0 ? PairedMuons[0]:std::vector<int> {-1, -1}')
-            .Define('Pair2', 'PairedMuons.size() > 1 ? PairedMuons[1]:std::vector<int> {-1, -1}')
+# For Invariant Mass, return a default value (-1.0) if no pair exists
 
-            .Define("MuonPair1",              "ReconstructedParticle::get(Pair1, RecoMuons)")
+            #Muon pairs for DP reconstruction           
+            .Define('PairedMuons', 'get_best_paired_indices(RecoMuon_eta, RecoMuon_phi, RecoMuon_charge)')
+            .Define('Pair1', 'PairedMuons.size() > 0 ? PairedMuons[0] : std::vector<int>{-1, -1}')
+            .Define('Pair2', 'PairedMuons.size() > 1 ? PairedMuons[1] : std::vector<int>{-1, -1}')
+
+            .Define("MuonPair1", "if (Pair1[0] != -1) return ReconstructedParticle::get(Pair1, RecoMuons); else return ROOT::VecOps::RVec<edm4hep::ReconstructedParticleData>();")
 
             .Define("MuonPair1_e",             "ReconstructedParticle::get_e(MuonPair1)")
             .Define("MuonPair1_total_e",       "ROOT::VecOps::Sum(MuonPair1_e)")
@@ -209,10 +181,10 @@ class Analysis():
             .Define("MuonPair1_charge",        "ReconstructedParticle::get_charge(MuonPair1)")
             .Define("MuonPair1_total_charge",  "ROOT::VecOps::Sum(MuonPair1_charge)")
             .Define("MuonPair1_InvMass",       "sqrt(MuonPair1_e*MuonPair1_e - MuonPair1_px*MuonPair1_px - MuonPair1_py*MuonPair1_py - MuonPair1_pz*MuonPair1_pz)")
-            .Define("MuonPair1_total_InvMass", "sqrt(MuonPair1_total_e*MuonPair1_total_e - MuonPair1_total_px*MuonPair1_total_px - MuonPair1_total_py*MuonPair1_total_py - MuonPair1_total_pz*MuonPair1_total_pz)")
+            .Define("MuonPair1_total_InvMass",  "MuonPair1.size() >= 2 ? sqrt(ROOT::VecOps::Sum(ReconstructedParticle::get_e(MuonPair1))*ROOT::VecOps::Sum(ReconstructedParticle::get_e(MuonPair1)) - (ROOT::VecOps::Sum(ReconstructedParticle::get_px(MuonPair1))*ROOT::VecOps::Sum(ReconstructedParticle::get_px(MuonPair1)) + ROOT::VecOps::Sum(ReconstructedParticle::get_py(MuonPair1))*ROOT::VecOps::Sum(ReconstructedParticle::get_py(MuonPair1)) + ROOT::VecOps::Sum(ReconstructedParticle::get_pz(MuonPair1))*ROOT::VecOps::Sum(ReconstructedParticle::get_pz(MuonPair1)))) : -1.0f")
             .Define("MuonPair1_dR", "get_pair_dR(Pair1, RecoMuon_eta, RecoMuon_phi)")    
             
-            .Define("MuonPair2", "ReconstructedParticle::get(Pair2, RecoMuons)")
+            .Define("MuonPair2", "if (Pair2[0] != -1) return ReconstructedParticle::get(Pair2, RecoMuons); else return ROOT::VecOps::RVec<edm4hep::ReconstructedParticleData>();")
 
             .Define("MuonPair2_e",             "ReconstructedParticle::get_e(MuonPair2)")
             .Define("MuonPair2_total_e",       "ROOT::VecOps::Sum(MuonPair2_e)")
@@ -241,6 +213,7 @@ class Analysis():
 
             .Define("Selected_muons",   "ReconstructedParticle::merge(MuonPair1, MuonPair2)")
             .Define("N_Selected_muons", "int(Selected_muons.size())")
+            .Define("Selected_muons_pt", "ReconstructedParticle::get_pt(Selected_muons)")   
 
 #---------- Reconstructed electrons ------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -260,143 +233,111 @@ class Analysis():
 
 
             .Define("Leptons",              "ReconstructedParticle::merge(RecoMuons, RecoElectrons)")
-            .Define("n_Leptons",           "int(Leptons.size())")
+            .Define("n_Leptons",            "int(Leptons.size())")
 
 
-#---------- Vertexing  ------------------------------------------------------------------------------------------------------------------------------------------------------
+# #---------- Vertexing  ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-            # MC event primary vertex
-            .Define("MC_PrimaryVertex",  "FCCAnalyses::MCParticle::get_EventPrimaryVertex(21)(Particle)" )
+#             # MC event primary vertex
+#             .Define("MC_PrimaryVertex",  "FCCAnalyses::MCParticle::get_EventPrimaryVertex(21)(Particle)" )
             
-            #Vertex fitting
-            .Define("n_tracks", "ReconstructedParticle2Track::getTK_n(EFlowTracks)")    #number of tracks
+#             #Vertex fitting
+#             .Define("n_tracks", "ReconstructedParticle2Track::getTK_n(EFlowTracks)")    #number of tracks
 
-            #First, reconstruct a vertex from all tracks 
-            #Input parameters are 1 = primary vertex, EFlowTracks contains all tracks, bool beamspotconstraint = true, bsc sigma x/y/z
-            .Define("VertexObject_allTracks", "VertexFitterSimple::VertexFitter_Tk ( 1, EFlowTracks, true, 4.5, 20e-3, 300)")
+#             #First, reconstruct a vertex from all tracks 
+#             #Input parameters are 1 = primary vertex, EFlowTracks contains all tracks, bool beamspotconstraint = true, bsc sigma x/y/z
+#             .Define("VertexObject_allTracks", "VertexFitterSimple::VertexFitter_Tk ( 1, EFlowTracks, true, 4.5, 20e-3, 300)")
 
-            .Define("RecoedPrimaryTracks",    "VertexFitterSimple::get_PrimaryTracks( EFlowTracks, true, 4.5, 20e-3, 300, 0., 0., 0.)")  #Select the tracks that are reconstructed  as primaries
-            .Define("n_RecoedPrimaryTracks",  "ReconstructedParticle2Track::getTK_n( RecoedPrimaryTracks)")
+#             .Define("RecoedPrimaryTracks",    "VertexFitterSimple::get_PrimaryTracks( EFlowTracks, true, 4.5, 20e-3, 300, 0., 0., 0.)")  #Select the tracks that are reconstructed  as primaries
+#             .Define("n_RecoedPrimaryTracks",  "ReconstructedParticle2Track::getTK_n( RecoedPrimaryTracks)")
 
-            .Define("PrimaryVertexObject",    "VertexFitterSimple::VertexFitter_Tk (1, RecoedPrimaryTracks, true, 4.5, 20e-3, 300) ")  #the final primary vertex
-            .Define("PrimaryVertex",          "VertexingUtils::get_VertexData(PrimaryVertexObject)")
+#             .Define("PrimaryVertexObject",    "VertexFitterSimple::VertexFitter_Tk (1, RecoedPrimaryTracks, true, 4.5, 20e-3, 300) ")  #the final primary vertex
+#             .Define("PrimaryVertex",          "VertexingUtils::get_VertexData(PrimaryVertexObject)")
                
 
-            #Muon Pairs Vertexing
-            .Define("MuonPair1_tracks",         "ReconstructedParticle2Track::getRP2TRK(MuonPair1, EFlowTracks)")
-            .Define("MuonPair2_tracks",         "ReconstructedParticle2Track::getRP2TRK(MuonPair2, EFlowTracks)")
+#             #Muon Pairs Vertexing
+#             .Define("MuonPair1_tracks",         "ReconstructedParticle2Track::getRP2TRK(MuonPair1, EFlowTracks)")
+#             .Define("MuonPair2_tracks",         "ReconstructedParticle2Track::getRP2TRK(MuonPair2, EFlowTracks)")
 
-            .Define("DV1_VertexObject",         "if(MuonPair1_tracks.size() >= 2) return VertexFitterSimple::VertexFitter_Tk(MuonPair1_tracks.size(), MuonPair1_tracks); else return VertexingUtils::FCCAnalysesVertex();")
-            .Define("DV2_VertexObject",         "if(MuonPair2_tracks.size() >= 2) return VertexFitterSimple::VertexFitter_Tk(MuonPair2_tracks.size(), MuonPair2_tracks); else return VertexingUtils::FCCAnalysesVertex();")
+#             .Define("DV1_VertexObject",         "if(MuonPair1_tracks.size() >= 2) return VertexFitterSimple::VertexFitter_Tk(MuonPair1_tracks.size(), MuonPair1_tracks); else return VertexingUtils::FCCAnalysesVertex();")
+#             .Define("DV2_VertexObject",         "if(MuonPair2_tracks.size() >= 2) return VertexFitterSimple::VertexFitter_Tk(MuonPair2_tracks.size(), MuonPair2_tracks); else return VertexingUtils::FCCAnalysesVertex();")
             
-            .Define("DV1_VertexData",           "VertexingUtils::get_VertexData(DV1_VertexObject)")
-            .Define("DV2_VertexData",           "VertexingUtils::get_VertexData(DV2_VertexObject)")
+#             .Define("DV1_VertexData",           "VertexingUtils::get_VertexData(DV1_VertexObject)")
+#             .Define("DV2_VertexData",           "VertexingUtils::get_VertexData(DV2_VertexObject)")
 
-            .Define("DV1_chi2",                 "DV1_VertexData.chi2")
-            .Define("DV2_chi2",                 "DV2_VertexData.chi2")
+#             .Define("DV1_chi2",                 "DV1_VertexData.chi2")
+#             .Define("DV2_chi2",                 "DV2_VertexData.chi2")
             
-            .Define("DV1_Lxyz",                 "sqrt(pow(DV1_VertexData.position[0],2) + pow(DV1_VertexData.position[1],2) + pow(DV1_VertexData.position[2],2))")
-            .Define("DV2_Lxyz",                 "sqrt(pow(DV2_VertexData.position[0],2) + pow(DV2_VertexData.position[1],2) + pow(DV2_VertexData.position[2],2))")
+#             .Define("DV1_Lxyz",                 "sqrt(pow(DV1_VertexData.position[0],2) + pow(DV1_VertexData.position[1],2) + pow(DV1_VertexData.position[2],2))")
+#             .Define("DV2_Lxyz",                 "sqrt(pow(DV2_VertexData.position[0],2) + pow(DV2_VertexData.position[1],2) + pow(DV2_VertexData.position[2],2))")
             
-            .Define("DV1_invM",                 "VertexingUtils::get_invM_pairs(DV1_VertexObject, 0.105658, 0.105658)")
-            .Define("DV2_invM",                 "VertexingUtils::get_invM_pairs(DV2_VertexObject, 0.105658, 0.105658)")
+#             .Define("DV1_invM",                 "VertexingUtils::get_invM_pairs(DV1_VertexObject, 0.105658, 0.105658)")
+#             .Define("DV2_invM",                 "VertexingUtils::get_invM_pairs(DV2_VertexObject, 0.105658, 0.105658)")
           
-            .Define("n_DVs",                    "VertexingUtils::get_VertexNtrk(DV1_VertexObject)")
+#             .Define("n_DVs",                    "VertexingUtils::get_VertexNtrk(DV1_VertexObject)")
         
 
-            #Reco Muons vertexing            
-            .Define("RecoMuons_tracks",             "ReconstructedParticle2Track::getRP2TRK(RecoMuons, EFlowTracks)")
-            .Define("RecoMuons_VertexObject",       "if(RecoMuons_tracks.size() >= 2) return VertexFitterSimple::VertexFitter_Tk(RecoMuons_tracks.size(), RecoMuons_tracks); else return VertexingUtils::FCCAnalysesVertex();")
-            .Define("RecoMuons_VertexData",         "VertexingUtils::get_VertexData(RecoMuons_VertexObject)")
-            .Define("RecoMuons_chi2",               "RecoMuons_VertexData.chi2")
-            .Define("RecoMuons_Lxyz",               "sqrt(pow(RecoMuons_VertexData.position[0],2) + pow(RecoMuons_VertexData.position[1],2) + pow(RecoMuons_VertexData.position[2],2))")
+#             #Reco Muons vertexing            
+#             .Define("RecoMuons_tracks",             "ReconstructedParticle2Track::getRP2TRK(RecoMuons, EFlowTracks)")
+#             .Define("RecoMuons_VertexObject",       "if(RecoMuons_tracks.size() >= 2) return VertexFitterSimple::VertexFitter_Tk(RecoMuons_tracks.size(), RecoMuons_tracks); else return VertexingUtils::FCCAnalysesVertex();")
+#             .Define("RecoMuons_VertexData",         "VertexingUtils::get_VertexData(RecoMuons_VertexObject)")
+#             .Define("RecoMuons_chi2",               "RecoMuons_VertexData.chi2")
+#             .Define("RecoMuons_Lxyz",               "sqrt(pow(RecoMuons_VertexData.position[0],2) + pow(RecoMuons_VertexData.position[1],2) + pow(RecoMuons_VertexData.position[2],2))")
             
-            .Define("n_GlobalDVs",                  "int(RecoMuons_chi2 >= 0)")
+#             .Define("n_GlobalDVs",                  "int(RecoMuons_chi2 >= 0)")
             
-            .Define("n_total_tracks",               "EFlowTracks.size()")
+#             .Define("n_total_tracks",               "EFlowTracks.size()")
 
 #---------- Jet Reconstruction ------------------------------------------------------------------------------------------------------------------------------------------------------
-            .Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, Leptons)")
-        )
+            .Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, Selected_muons)")
+        
+            .Define("pseudo_jets_noMu", #Jet clustering
+                    "FCCAnalyses::JetClusteringUtils::set_pseudoJets("
+                    "ReconstructedParticle::get_px(RP_noMu),"
+                    "ReconstructedParticle::get_py(RP_noMu),"
+                    "ReconstructedParticle::get_pz(RP_noMu),"
+                    "ReconstructedParticle::get_e (RP_noMu))")        
 
-        jetClusteringHelper = ExclusiveJetClusteringHelper("RP_noMu", 2, "N2")
-        dframe2 = jetClusteringHelper.define(dframe2)            
+            #ee_kt (Durham): clustering_ee_kt(inclusive (0) or exclusive (jet #), up to exaclty N jets for exclusive or ycut for inclusive, (0=sort by pT, 1=sort by E), recombination=0)
+            .Define("clustered_durham2_noMu", "JetClustering::clustering_ee_kt(2, 2, 0, 0)(pseudo_jets_noMu)")
+            .Define("jets_durham2_noMu",      "FCCAnalyses::JetClusteringUtils::get_pseudoJets(clustered_durham2_noMu)")
 
-        dframe2 = (
-            dframe2
-            # Use the helper's internal name directly
-            .Define("jets_p4", f"JetConstituentsUtils::compute_tlv_jets({jetClusteringHelper.jets})")
+            .Define("zjj_e",  "FCCAnalyses::JetClusteringUtils::get_e (jets_durham2_noMu)")
+            .Define("zjj_px", "FCCAnalyses::JetClusteringUtils::get_px(jets_durham2_noMu)")
+            .Define("zjj_py", "FCCAnalyses::JetClusteringUtils::get_py(jets_durham2_noMu)")
+            .Define("zjj_pz", "FCCAnalyses::JetClusteringUtils::get_pz(jets_durham2_noMu)")
+            .Define("zjj_pt", "return sqrt(zjj_px*zjj_px + zjj_py*zjj_py);")
+
+            .Define("n_zjj",  "int(zjj_e.size())")
+
+            #Invariant mass of all the jets
+            .Define("zjj_total_e",  "ROOT::VecOps::Sum(zjj_e)")
+            .Define("zjj_total_px", "ROOT::VecOps::Sum(zjj_px)")
+            .Define("zjj_total_py", "ROOT::VecOps::Sum(zjj_py)")
+            .Define("zjj_total_pz", "ROOT::VecOps::Sum(zjj_pz)")
+            .Define("zjj_total_pt", "ROOT::VecOps::Sum(zjj_pt)")
+            .Define("zjj_invMass_total","if (n_zjj>=2) return float(sqrt(zjj_total_e*zjj_total_e - (zjj_total_px*zjj_total_px + zjj_total_py*zjj_total_py + zjj_total_pz*zjj_total_pz))); else return float(-1.);")
             
-            # Use explicit RVec<float> return types to satisfy the compiler
-            .Define("zjj_pt",  "ROOT::VecOps::RVec<float> res; for(auto& v: jets_p4) res.push_back(v.Pt()); return res;")
-            .Define("zjj_e",   "ROOT::VecOps::RVec<float> res; for(auto& v: jets_p4) res.push_back(v.E()); return res;")
-            .Define("zjj_px",  "ROOT::VecOps::RVec<float> res; for(auto& v: jets_p4) res.push_back(v.Px()); return res;")
-            .Define("zjj_py",  "ROOT::VecOps::RVec<float> res; for(auto& v: jets_p4) res.push_back(v.Py()); return res;")
-            .Define("zjj_pz",  "ROOT::VecOps::RVec<float> res; for(auto& v: jets_p4) res.push_back(v.Pz()); return res;")
-            
-            .Define("n_zjj",   "int(jets_p4.size())")
-            
-            # Calculate Mass (cast to float immediately)
-            .Define("zjj_invMass", "n_zjj >= 2 ? (float)((jets_p4[0] + jets_p4[1]).M()) : -1.0f")
-            
-            # Now that zjj_pt is explicitly an RVec<float>, Argsort should work
+            #Sorting manually to decreasing pT
             .Define("zjj_sort_idx",  "ROOT::VecOps::Reverse(ROOT::VecOps::Argsort(zjj_pt))")
+            .Define("zjj_e_sorted",  "ROOT::VecOps::Take(zjj_e,  zjj_sort_idx)")
+            .Define("zjj_px_sorted", "ROOT::VecOps::Take(zjj_px, zjj_sort_idx)")
+            .Define("zjj_py_sorted", "ROOT::VecOps::Take(zjj_py, zjj_sort_idx)")
+            .Define("zjj_pz_sorted", "ROOT::VecOps::Take(zjj_pz, zjj_sort_idx)")
             .Define("zjj_pt_sorted", "ROOT::VecOps::Take(zjj_pt, zjj_sort_idx)")
-            .Define("zjj_leading_pt",    "n_zjj > 0 ? zjj_pt_sorted[0] : -1.0f")
-            .Define("zjj_subleading_pt", "n_zjj > 1 ? zjj_pt_sorted[1] : -1.0f")
+
+            .Define("zjj_leading_pt",    "if (n_zjj > 0) return zjj_pt_sorted[0]; else return float(-1.0);")
+            .Define("zjj_subleading_pt", "if (n_zjj > 1) return zjj_pt_sorted[1]; else return float(-1.0);")
+
+            .Define("zjj_e_sum",  "if (n_zjj>=2) return float(zjj_e.at(0)  + zjj_e.at(1));  else return float(-1.);")
+            .Define("zjj_px_sum", "if (n_zjj>=2) return float(zjj_px.at(0) + zjj_px.at(1)); else return float(-1.);")
+            .Define("zjj_py_sum", "if (n_zjj>=2) return float(zjj_py.at(0) + zjj_py.at(1)); else return float(-1.);")
+            .Define("zjj_pz_sum", "if (n_zjj>=2) return float(zjj_pz.at(0) + zjj_pz.at(1)); else return float(-1.);")
+            .Define("zjj_pt_sum", "if (n_zjj>=2) return float(sqrt((zjj_px_sum*zjj_px_sum) + (zjj_py_sum*zjj_py_sum))); else return float(-1.);")           
+
+            .Define("zjj_invMass","if (n_zjj>=2) return float(sqrt(zjj_e_sum*zjj_e_sum - (zjj_px_sum*zjj_px_sum + zjj_py_sum*zjj_py_sum + zjj_pz_sum*zjj_pz_sum))); else return float(-1.);")
         )
         return dframe2
- 
-        #     .Define("pseudo_jets_noMu", #Jet clustering
-        #             "FCCAnalyses::JetClusteringUtils::set_pseudoJets("
-        #             "ReconstructedParticle::get_px(RP_noMu),"
-        #             "ReconstructedParticle::get_py(RP_noMu),"
-        #             "ReconstructedParticle::get_pz(RP_noMu),"
-        #             "ReconstructedParticle::get_e (RP_noMu))")        
-
-        #     #ee_kt (Durham): clustering_ee_kt(inclusive (0) or exclusive (jet #), up to exaclty N jets for exclusive or ycut for inclusive, (0=sort by pT, 1=sort by E), recombination=0)
-        #     .Define("clustered_durham2_noMu", "JetClustering::clustering_ee_kt(2, 2, 0, 0)(pseudo_jets_noMu)")
-        #     .Define("jets_durham2_noMu",      "FCCAnalyses::JetClusteringUtils::get_pseudoJets(clustered_durham2_noMu)")
-
-        #     .Define("zjj_e",  "FCCAnalyses::JetClusteringUtils::get_e (jets_durham2_noMu)")
-        #     .Define("zjj_px", "FCCAnalyses::JetClusteringUtils::get_px(jets_durham2_noMu)")
-        #     .Define("zjj_py", "FCCAnalyses::JetClusteringUtils::get_py(jets_durham2_noMu)")
-        #     .Define("zjj_pz", "FCCAnalyses::JetClusteringUtils::get_pz(jets_durham2_noMu)")
-        #     .Define("zjj_pt", "return sqrt(zjj_px*zjj_px + zjj_py*zjj_py);")
-
-        #     .Define("n_zjj",  "int(zjj_e.size())")
-
-        #     #Invariant mass of all the jets
-        #     .Define("zjj_total_e",  "ROOT::VecOps::Sum(zjj_e)")
-        #     .Define("zjj_total_px", "ROOT::VecOps::Sum(zjj_px)")
-        #     .Define("zjj_total_py", "ROOT::VecOps::Sum(zjj_py)")
-        #     .Define("zjj_total_pz", "ROOT::VecOps::Sum(zjj_pz)")
-        #     .Define("zjj_total_pt", "ROOT::VecOps::Sum(zjj_pt)")
-        #     .Define("zjj_invMass_total","if (n_zjj>=2) return float(sqrt(zjj_total_e*zjj_total_e - (zjj_total_px*zjj_total_px + zjj_total_py*zjj_total_py + zjj_total_pz*zjj_total_pz))); else return float(-1.);")
-            
-        #     #Sorting manually to decreasing pT
-        #     .Define("zjj_sort_idx",  "ROOT::VecOps::Reverse(ROOT::VecOps::Argsort(zjj_pt))")
-        #     .Define("zjj_e_sorted",  "ROOT::VecOps::Take(zjj_e,  zjj_sort_idx)")
-        #     .Define("zjj_px_sorted", "ROOT::VecOps::Take(zjj_px, zjj_sort_idx)")
-        #     .Define("zjj_py_sorted", "ROOT::VecOps::Take(zjj_py, zjj_sort_idx)")
-        #     .Define("zjj_pz_sorted", "ROOT::VecOps::Take(zjj_pz, zjj_sort_idx)")
-        #     .Define("zjj_pt_sorted", "ROOT::VecOps::Take(zjj_pt, zjj_sort_idx)")
-
-        #     .Define("zjj_leading_pt",    "if (n_zjj > 0) return zjj_pt_sorted[0]; else return float(-1.0);")
-        #     .Define("zjj_subleading_pt", "if (n_zjj > 1) return zjj_pt_sorted[1]; else return float(-1.0);")
-
-        #     # .Define("zjj_leading_pt",    "if (zjj_pt.size() > 0) return float(zjj_pt.at(0)); else return float(-1.0);")            
-        #     # .Define("zjj_subleading_pt", "if (zjj_pt.size() > 1) return float(zjj_pt.at(1)); else return float(-1.0);")
-
-        #     .Define("zjj_e_sum",  "if (n_zjj>=2) return float(zjj_e.at(0)  + zjj_e.at(1));  else return float(-1.);")
-        #     .Define("zjj_px_sum", "if (n_zjj>=2) return float(zjj_px.at(0) + zjj_px.at(1)); else return float(-1.);")
-        #     .Define("zjj_py_sum", "if (n_zjj>=2) return float(zjj_py.at(0) + zjj_py.at(1)); else return float(-1.);")
-        #     .Define("zjj_pz_sum", "if (n_zjj>=2) return float(zjj_pz.at(0) + zjj_pz.at(1)); else return float(-1.);")
-        #     .Define("zjj_pt_sum", "if (n_zjj>=2) return float(sqrt((zjj_px_sum*zjj_px_sum) + (zjj_py_sum*zjj_py_sum))); else return float(-1.);")           
-
-        #     .Define("zjj_invMass","if (n_zjj>=2) return float(sqrt(zjj_e_sum*zjj_e_sum - (zjj_px_sum*zjj_px_sum + zjj_py_sum*zjj_py_sum + zjj_pz_sum*zjj_pz_sum))); else return float(-1.);")
-        # )
-        # return dframe2
 
     #Mandatory: output function, please make sure you return the branch list as a python list
     def output(self):
@@ -404,28 +345,6 @@ class Analysis():
         Output variables which will be saved to output root file.
         '''
         branch_list = [
-            # #Gen Muons
-            # "n_FSGenMuon",
-            # "FSGenMuon_e",
-            # "FSGenMuon_p",
-            # "FSGenMuon_pt",
-            # "FSGenMuon_px",
-            # "FSGenMuon_py",
-            # "FSGenMuon_pz",
-            # "FSGenMuon_eta",
-            # "FSGenMuon_theta",
-            # "FSGenMuon_phi",
-            # "FSGenMuon_charge",
-            # "FSGen_Lxy",
-            # "FSGen_Lxyz",
-            # "MC_n",
-            # "MC_PDG",
-            # "MC_M1_idx",
-            # "MC_M1_part",
-            # "MC_M1_pdg",
-            'n_gen_Z',
-            'GenZ_InvM',
-
             #Reco Muons
             "n_RecoMuons",
             'RecoMuon_pt',
@@ -439,20 +358,18 @@ class Analysis():
             'RecoMuon_phi',
             'RecoMuon_charge',
 
-            'MuonPair1_charge',
-            'MuonPair2_charge',
+            #DR Muon pairs
             'MuonPair1_InvMass',
             'MuonPair2_InvMass',
-            "MuonPairs_charge",
-            "MuonPairs_InvMass",
             "MuonPair1_dR",
             "MuonPair2_dR",
 
-            'MuonPair1_total_charge',
             'MuonPair1_total_InvMass',
-            'MuonPair2_total_charge',
             'MuonPair2_total_InvMass',        
+            "MuonPairs_InvMass",
 
+            'Selected_muons_pt',
+            
             #Reco Jets
             'n_zjj',
             'zjj_e',
@@ -461,22 +378,21 @@ class Analysis():
             'zjj_py',
             'zjj_pz',
             'zjj_invMass',
-            # 'zjj_invMass_individual'
             'zjj_leading_pt',
             'zjj_subleading_pt',
 
             #Vertexing
-            'n_DVs', 
-            'DV1_Lxyz', 
+            # 'n_DVs', 
+            # 'DV1_Lxyz', 
             # 'DV2_Lxyz', 
             # 'DV1_invM',
             # 'DV2_invM',
 
-            'RecoMuons_Lxyz',
+            # 'RecoMuons_Lxyz',
             # 'n_GlobalDVs',
             # 'SecondaryVertex_Lxyz',
             # 'PrimaryVertexSize',
-            'n_total_tracks',
+            # 'n_total_tracks',
 
         ]
         return branch_list
