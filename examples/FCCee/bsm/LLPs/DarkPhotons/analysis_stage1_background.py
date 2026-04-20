@@ -121,7 +121,9 @@ class Analysis():
         self.nCPUS           = 8
         self.analysis_name   = 'My Analysis'
         self.n_threads       = 1
-        self.runBatch         = True
+        self.runBatch        = True
+        self.batchQueue      = "nextweek"
+        self.compGroup       = "group_u_FCC.local_gen"
         #self.userBatchConfig = "/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/user_config.sh"
 
 
@@ -160,7 +162,6 @@ class Analysis():
 		    .Define("RecoMuon_phi",     "ReconstructedParticle::get_phi(RecoMuons)")
             .Define("RecoMuon_charge",  "ReconstructedParticle::get_charge(RecoMuons)")
 
-# For Invariant Mass, return a default value (-1.0) if no pair exists
 
             #Muon pairs for DP reconstruction           
             .Define('PairedMuons', 'get_best_paired_indices(RecoMuon_eta, RecoMuon_phi, RecoMuon_charge)')
