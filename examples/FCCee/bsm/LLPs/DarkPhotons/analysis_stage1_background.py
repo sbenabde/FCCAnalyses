@@ -94,7 +94,7 @@ class Analysis():
     def __init__(self, cmdline_args):
         
         self.process_list = {
-            #'wzp6_ee_qqH_HZZ_ecm240':{'fraction':0.025},
+            'wzp6_ee_qqH_HZZ_ecm240':{'chunks':10,'fraction':0.01},
             #'wzp6_ee_bbH_HZZ_ecm240':{'fraction':0.01},
             #'wzp6_ee_qqH_ecm240':{'fraction':0.01},
 
@@ -104,7 +104,7 @@ class Analysis():
             #'wzp6_ee_ccH_Hmumu_ecm240':{'fraction':0.025},
             #'wzp6_ee_bbH_Hmumu_ecm240':{'fraction':0.033},
 
-            'wzp6_ee_qqH_HZZ_llll_ecm240':{'fraction':0.083},
+            #'wzp6_ee_qqH_HZZ_llll_ecm240':{'fraction':0.083},
 
             #'wzp6_ee_qqH_HWW_ecm240':{'fraction':0.09},
             #'wzp6_ee_ccH_HWW_ecm240':{'fraction':0.083},
@@ -116,12 +116,13 @@ class Analysis():
             #'p8_ee_WW_ecm240':{'fraction':0.01},
         }
 
-        self.prod_tag = 'FCCee/winter2023/IDEA/'
-        self.output_dir = "STAGE1_output"
-    
-        self.analysis_name = 'My Analysis'
-        self.n_threads = 1
-
+        self.prod_tag        = 'FCCee/winter2023/IDEA/'
+        self.output_dirEos   = "/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/Stage1_output_20_04_26"
+        self.nCPUS           = 8
+        self.analysis_name   = 'My Analysis'
+        self.n_threads       = 1
+        self.runBatch         = True
+        #self.userBatchConfig = "/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/user_config.sh"
 
 
     def analyzers(self, dframe):
@@ -236,61 +237,19 @@ class Analysis():
             .Define("n_Leptons",            "int(Leptons.size())")
 
 
-# #---------- Vertexing  ------------------------------------------------------------------------------------------------------------------------------------------------------
-
-#             # MC event primary vertex
-#             .Define("MC_PrimaryVertex",  "FCCAnalyses::MCParticle::get_EventPrimaryVertex(21)(Particle)" )
-            
-#             #Vertex fitting
-#             .Define("n_tracks", "ReconstructedParticle2Track::getTK_n(EFlowTracks)")    #number of tracks
-
-#             #First, reconstruct a vertex from all tracks 
-#             #Input parameters are 1 = primary vertex, EFlowTracks contains all tracks, bool beamspotconstraint = true, bsc sigma x/y/z
-#             .Define("VertexObject_allTracks", "VertexFitterSimple::VertexFitter_Tk ( 1, EFlowTracks, true, 4.5, 20e-3, 300)")
-
-#             .Define("RecoedPrimaryTracks",    "VertexFitterSimple::get_PrimaryTracks( EFlowTracks, true, 4.5, 20e-3, 300, 0., 0., 0.)")  #Select the tracks that are reconstructed  as primaries
-#             .Define("n_RecoedPrimaryTracks",  "ReconstructedParticle2Track::getTK_n( RecoedPrimaryTracks)")
-
-#             .Define("PrimaryVertexObject",    "VertexFitterSimple::VertexFitter_Tk (1, RecoedPrimaryTracks, true, 4.5, 20e-3, 300) ")  #the final primary vertex
-#             .Define("PrimaryVertex",          "VertexingUtils::get_VertexData(PrimaryVertexObject)")
-               
-
-#             #Muon Pairs Vertexing
-#             .Define("MuonPair1_tracks",         "ReconstructedParticle2Track::getRP2TRK(MuonPair1, EFlowTracks)")
-#             .Define("MuonPair2_tracks",         "ReconstructedParticle2Track::getRP2TRK(MuonPair2, EFlowTracks)")
-
-#             .Define("DV1_VertexObject",         "if(MuonPair1_tracks.size() >= 2) return VertexFitterSimple::VertexFitter_Tk(MuonPair1_tracks.size(), MuonPair1_tracks); else return VertexingUtils::FCCAnalysesVertex();")
-#             .Define("DV2_VertexObject",         "if(MuonPair2_tracks.size() >= 2) return VertexFitterSimple::VertexFitter_Tk(MuonPair2_tracks.size(), MuonPair2_tracks); else return VertexingUtils::FCCAnalysesVertex();")
-            
-#             .Define("DV1_VertexData",           "VertexingUtils::get_VertexData(DV1_VertexObject)")
-#             .Define("DV2_VertexData",           "VertexingUtils::get_VertexData(DV2_VertexObject)")
-
-#             .Define("DV1_chi2",                 "DV1_VertexData.chi2")
-#             .Define("DV2_chi2",                 "DV2_VertexData.chi2")
-            
-#             .Define("DV1_Lxyz",                 "sqrt(pow(DV1_VertexData.position[0],2) + pow(DV1_VertexData.position[1],2) + pow(DV1_VertexData.position[2],2))")
-#             .Define("DV2_Lxyz",                 "sqrt(pow(DV2_VertexData.position[0],2) + pow(DV2_VertexData.position[1],2) + pow(DV2_VertexData.position[2],2))")
-            
-#             .Define("DV1_invM",                 "VertexingUtils::get_invM_pairs(DV1_VertexObject, 0.105658, 0.105658)")
-#             .Define("DV2_invM",                 "VertexingUtils::get_invM_pairs(DV2_VertexObject, 0.105658, 0.105658)")
-          
-#             .Define("n_DVs",                    "VertexingUtils::get_VertexNtrk(DV1_VertexObject)")
-        
-
-#             #Reco Muons vertexing            
-#             .Define("RecoMuons_tracks",             "ReconstructedParticle2Track::getRP2TRK(RecoMuons, EFlowTracks)")
-#             .Define("RecoMuons_VertexObject",       "if(RecoMuons_tracks.size() >= 2) return VertexFitterSimple::VertexFitter_Tk(RecoMuons_tracks.size(), RecoMuons_tracks); else return VertexingUtils::FCCAnalysesVertex();")
-#             .Define("RecoMuons_VertexData",         "VertexingUtils::get_VertexData(RecoMuons_VertexObject)")
-#             .Define("RecoMuons_chi2",               "RecoMuons_VertexData.chi2")
-#             .Define("RecoMuons_Lxyz",               "sqrt(pow(RecoMuons_VertexData.position[0],2) + pow(RecoMuons_VertexData.position[1],2) + pow(RecoMuons_VertexData.position[2],2))")
-            
-#             .Define("n_GlobalDVs",                  "int(RecoMuons_chi2 >= 0)")
-            
-#             .Define("n_total_tracks",               "EFlowTracks.size()")
-
 #---------- Jet Reconstruction ------------------------------------------------------------------------------------------------------------------------------------------------------
-            .Define("RP_noMu", "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, Selected_muons)")
-        
+            .Define("RP_noMu",      "FCCAnalyses::ReconstructedParticle::remove(ReconstructedParticles, Selected_muons)")
+            .Define("RP_noMu_e",    "ReconstructedParticle::get_e(RP_noMu)")
+            .Define("RP_noMu_e_tot","ROOT::VecOps::Sum(RP_noMu_e)")
+            .Define("RP_noMu_px",   "ReconstructedParticle::get_px(RP_noMu)")
+            .Define("RP_noMu_px_tot","ROOT::VecOps::Sum(RP_noMu_px)")
+            .Define("RP_noMu_py",   "ReconstructedParticle::get_py(RP_noMu)")
+            .Define("RP_noMu_py_tot","ROOT::VecOps::Sum(RP_noMu_py)")
+            .Define("RP_noMu_pz",   "ReconstructedParticle::get_pz(RP_noMu)")
+            .Define("RP_noMu_pz_tot","ROOT::VecOps::Sum(RP_noMu_pz)")
+            .Define("RP_noMu_pt",   "ReconstructedParticle::get_pt(RP_noMu)")
+            .Define("RP_noMu_InvM", "sqrt(RP_noMu_e_tot*RP_noMu_e_tot - (RP_noMu_px_tot*RP_noMu_px_tot + RP_noMu_py_tot*RP_noMu_py_tot + RP_noMu_pz_tot*RP_noMu_pz_tot))")
+
             .Define("pseudo_jets_noMu", #Jet clustering
                     "FCCAnalyses::JetClusteringUtils::set_pseudoJets("
                     "ReconstructedParticle::get_px(RP_noMu),"
@@ -306,28 +265,12 @@ class Analysis():
             .Define("zjj_px", "FCCAnalyses::JetClusteringUtils::get_px(jets_durham2_noMu)")
             .Define("zjj_py", "FCCAnalyses::JetClusteringUtils::get_py(jets_durham2_noMu)")
             .Define("zjj_pz", "FCCAnalyses::JetClusteringUtils::get_pz(jets_durham2_noMu)")
-            .Define("zjj_pt", "return sqrt(zjj_px*zjj_px + zjj_py*zjj_py);")
+            .Define("zjj_pt", "return sqrt(zjj_px*zjj_px + zjj_py*zjj_py)")
 
             .Define("n_zjj",  "int(zjj_e.size())")
-
-            #Invariant mass of all the jets
-            .Define("zjj_total_e",  "ROOT::VecOps::Sum(zjj_e)")
-            .Define("zjj_total_px", "ROOT::VecOps::Sum(zjj_px)")
-            .Define("zjj_total_py", "ROOT::VecOps::Sum(zjj_py)")
-            .Define("zjj_total_pz", "ROOT::VecOps::Sum(zjj_pz)")
-            .Define("zjj_total_pt", "ROOT::VecOps::Sum(zjj_pt)")
-            .Define("zjj_invMass_total","if (n_zjj>=2) return float(sqrt(zjj_total_e*zjj_total_e - (zjj_total_px*zjj_total_px + zjj_total_py*zjj_total_py + zjj_total_pz*zjj_total_pz))); else return float(-1.);")
             
-            #Sorting manually to decreasing pT
-            .Define("zjj_sort_idx",  "ROOT::VecOps::Reverse(ROOT::VecOps::Argsort(zjj_pt))")
-            .Define("zjj_e_sorted",  "ROOT::VecOps::Take(zjj_e,  zjj_sort_idx)")
-            .Define("zjj_px_sorted", "ROOT::VecOps::Take(zjj_px, zjj_sort_idx)")
-            .Define("zjj_py_sorted", "ROOT::VecOps::Take(zjj_py, zjj_sort_idx)")
-            .Define("zjj_pz_sorted", "ROOT::VecOps::Take(zjj_pz, zjj_sort_idx)")
-            .Define("zjj_pt_sorted", "ROOT::VecOps::Take(zjj_pt, zjj_sort_idx)")
-
-            .Define("zjj_leading_pt",    "if (n_zjj > 0) return zjj_pt_sorted[0]; else return float(-1.0);")
-            .Define("zjj_subleading_pt", "if (n_zjj > 1) return zjj_pt_sorted[1]; else return float(-1.0);")
+            .Define("zjj_leading_pt",    "if (n_zjj > 0) return zjj_pt[0]; else return float(-1.0);")
+            .Define("zjj_subleading_pt", "if (n_zjj > 1) return zjj_pt[1]; else return float(-1.0);")
 
             .Define("zjj_e_sum",  "if (n_zjj>=2) return float(zjj_e.at(0)  + zjj_e.at(1));  else return float(-1.);")
             .Define("zjj_px_sum", "if (n_zjj>=2) return float(zjj_px.at(0) + zjj_px.at(1)); else return float(-1.);")
@@ -336,6 +279,29 @@ class Analysis():
             .Define("zjj_pt_sum", "if (n_zjj>=2) return float(sqrt((zjj_px_sum*zjj_px_sum) + (zjj_py_sum*zjj_py_sum))); else return float(-1.);")           
 
             .Define("zjj_invMass","if (n_zjj>=2) return float(sqrt(zjj_e_sum*zjj_e_sum - (zjj_px_sum*zjj_px_sum + zjj_py_sum*zjj_py_sum + zjj_pz_sum*zjj_pz_sum))); else return float(-1.);")
+
+#---------- Vertexing  ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            .Define("MuonTracks1",   "ReconstructedParticle2Track::getRP2TRK(MuonPair1, EFlowTracks)")
+            .Define("DVObject1",     "VertexFitterSimple::VertexFitter_Tk(1, MuonTracks1)")
+            .Define("DVertex1",      "VertexingUtils::get_VertexData(DVObject1)")
+
+            .Define("MuonTracks2",   "ReconstructedParticle2Track::getRP2TRK(MuonPair2, EFlowTracks)")
+            .Define("DVObject2",     "VertexFitterSimple::VertexFitter_Tk(1, MuonTracks2)")
+            .Define("DVertex2",      "VertexingUtils::get_VertexData(DVObject2)")
+
+            .Define("DV1_X",         "DVertex1.position.x")
+            .Define("DV1_Y",         "DVertex1.position.y")
+            .Define("DV1_Z",         "DVertex1.position.z")
+            .Define("DV1_Lxyz",      "sqrt(DV1_X*DV1_X + DV1_Y*DV1_Y + DV1_Z*DV1_Z)")
+
+            .Define("DV2_X",         "DVertex2.position.x")
+            .Define("DV2_Y",         "DVertex2.position.y")
+            .Define("DV2_Z",         "DVertex2.position.z")
+            .Define("DV2_Lxyz",      "sqrt(DV2_X*DV2_X + DV2_Y*DV2_Y + DV2_Z*DV2_Z)")
+
+            .Define("DV_lxyz",       "ROOT::VecOps::RVec<float>{(float)DV1_Lxyz, (float)DV2_Lxyz}")
+            .Define("n_DVs",         "(DVertex1.chi2 >= 0 ? 1 : 0) + (DVertex2.chi2 >= 0 ? 1 : 0)")
         )
         return dframe2
 
@@ -381,18 +347,12 @@ class Analysis():
             'zjj_leading_pt',
             'zjj_subleading_pt',
 
+            'RP_noMu_InvM',
+
             #Vertexing
-            # 'n_DVs', 
-            # 'DV1_Lxyz', 
-            # 'DV2_Lxyz', 
-            # 'DV1_invM',
-            # 'DV2_invM',
-
-            # 'RecoMuons_Lxyz',
-            # 'n_GlobalDVs',
-            # 'SecondaryVertex_Lxyz',
-            # 'PrimaryVertexSize',
-            # 'n_total_tracks',
-
+            'n_DVs',
+            'DV1_Lxyz',
+            'DV2_Lxyz',
+            'DV_lxyz',
         ]
         return branch_list
