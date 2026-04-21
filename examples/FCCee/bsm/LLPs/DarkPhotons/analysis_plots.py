@@ -11,17 +11,18 @@ ana_tex        = 'e^{+}e^{-} #rightarrow Zh, Z #rightarrow qq, h #rightarrow Z_{
 delphesVersion = '3.4.2'
 energy         = 240
 collider       = 'FCC-ee'
-inputDir       = "FINAL_output/wzp6_ee_qqH_HZZ_llll_ecm240/"
+inputDir       = "FINAL_output/signal/"
 formats        = ['png']
 yaxis          = ['lin','log']
 stacksig       = ['nostack']
-outdir         = '/eos/user/s/sbenabde/PLOTS_output/wzp6_ee_qqH_HZZ_llll_ecm240'
+outdir         = '/eos/user/s/sbenabde/PLOTS_output/signal'
 splitLeg       = False
 
 variables = [
             'n_RecoMuons',
             'RecoMuon_pt',
             'Selected_muons_pt',
+            'Selected_muons_eta',
 
             'n_zjj',
             'zjj_invMass',
@@ -37,6 +38,13 @@ variables = [
             'MuonPair2_total_InvMass_long_range',
             'MuonPair1_dR',
             'MuonPair2_dR',
+
+            'RP_noMu_InvM',
+
+            'n_DVs',
+            'DV1_Lxyz',
+            'DV2_Lxyz',
+            'DV_lxyz',
 ]
 
 #Dictionary with the list of selections to be plotted for this analysis. The name of the selections should be the same than in the final selection
@@ -46,6 +54,7 @@ selections['Lumi']  = [
     "Preselection",
     "Leptonic_InvM",
     "4mu_InvM",
+    'DV_lxyz',
     "Full_selection",
 
 ]
@@ -54,6 +63,7 @@ selections['Normalize']  = [
     "Preselection",
     "Leptonic_InvM",
     "4mu_InvM",
+    'DV_lxyz',
     "Full_selection",
 
 ]
@@ -65,6 +75,7 @@ extralabel['Z-mass']  =         r"n_{zjj} >= 2 & 70 < m_{Z} < 110 GeV"
 extralabel['Full_Zselection'] = r"Full Z Selection"
 extralabel['Leptonic_InvM'] =   r"M_{2#mu} < 11 GeV"
 extralabel['4mu_InvM'] =        r"120 GeV < M_{4#mu} < 130 GeV"
+extralabel['DV_lxyz'] =         r"L_{xyz} < 10mm"
 extralabel['Full_selection'] =  r"Full Selection"
 
 
@@ -89,7 +100,7 @@ my_samples = {
                         #'wzp6_ee_ccH_Hmumu_ecm240':['wzp6_ee_ccH_Hmumu_ecm240'],
                         #'wzp6_ee_bbH_Hmumu_ecm240':['wzp6_ee_bbH_Hmumu_ecm240'],
 
-                        'wzp6_ee_qqH_HZZ_llll_ecm240':['wzp6_ee_qqH_HZZ_llll_ecm240'],
+                        #'wzp6_ee_qqH_HZZ_llll_ecm240':['wzp6_ee_qqH_HZZ_llll_ecm240'],
 
                         #'wzp6_ee_qqH_HWW_ecm240':['wzp6_ee_qqH_HWW_ecm240'],
                         #'wzp6_ee_ccH_HWW_ecm240':['wzp6_ee_ccH_HWW_ecm240'],

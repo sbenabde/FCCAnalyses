@@ -3,7 +3,7 @@ import ROOT
 #Input directory where the files produced in the pre-selection stages are
 inputDir = "STAGE1_output"
 #Output directory where the resulting files will be stored
-outputDir = "FINAL_output/wzp6_ee_qqH_HZZ_llll_ecm240"
+outputDir = "FINAL_output/signal"
 
 #Run over the full statistics from stage1 input file
 processList = {
@@ -26,7 +26,7 @@ processList = {
         #'wzp6_ee_ccH_Hmumu_ecm240':{},
         #'wzp6_ee_bbH_Hmumu_ecm240':{},
 
-        'wzp6_ee_qqH_HZZ_llll_ecm240':{},
+       #'wzp6_ee_qqH_HZZ_llll_ecm240':{},
 
         #'wzp6_ee_qqH_HWW_ecm240':{},
         #'wzp6_ee_ccH_HWW_ecm240':{},
@@ -34,8 +34,8 @@ processList = {
 
         # 'wzp6_ee_mumuH_Hbb_ecm240':{},
         
-        # 'p8_ee_ZZ_ecm240':{},
-        # 'p8_ee_WW_ecm240':{},
+        #'p8_ee_ZZ_ecm240':{},
+        #'p8_ee_WW_ecm240':{},
 }
 
 #Need this block to add the cross sections of the self generated samples, otherwise it sets to 1.0 pb
@@ -109,6 +109,7 @@ cuts = ['(n_zjj >= 2)',
         '(zjj_invMass > 85 && zjj_invMass < 95)',
         '(MuonPair1_total_InvMass < 11 && MuonPair2_total_InvMass < 11)',
         '(MuonPairs_InvMass > 120 && MuonPairs_InvMass < 130)',
+        '(All(DV_lxyz > 3))',
 
 ]
 
@@ -128,7 +129,8 @@ cutList = {
     
     "Leptonic_InvM": f'{cuts[0]} && {cuts[1]} && {cuts[2]} && {cuts[7]}',
     "4mu_InvM": f'{cuts[0]} && {cuts[1]} && {cuts[2]} && {cuts[8]}',
-    "Full_selection": f'{cuts[0]} && {cuts[1]} && {cuts[2]} && {cuts[7]} && {cuts[8]}',
+    "DV_lxyz": f'{cuts[0]} && {cuts[1]} && {cuts[2]} && {cuts[9]}',
+    "Full_selection": f'{cuts[0]} && {cuts[1]} && {cuts[2]} && {cuts[7]} && {cuts[8]} && {cuts[9]}',
 
 }
 
@@ -146,6 +148,7 @@ cutLabels = {
    
     "Leptonic_InvM" :  r"Leptonic_InvM",
     "4mu_InvM" :       r"4mu_InvM",
+    "DV_lxyz" :        r"DV_lxyz",
     "Full_selection" : r"Full_selection",
     }
 
@@ -159,7 +162,8 @@ cutLabels = {
 histoList = {   
     'n_RecoMuons':                          {"name":'n_RecoMuons',               "title": "Number of reco. muons",            "bin":10,  "xmin":-0.5, "xmax":9.5},
     'RecoMuon_pt':                          {"name":'RecoMuon_pt',               "title": "Reco muons p_{T} [GeV]",           "bin":100, "xmin":0,    "xmax":150},
-    'Selected_muons_pt':                    {"name":'Selected_muons_pt',         "title": "4#mu p_{T} [GeV]",                 "bin":100, "xmin":0,    "xmax":150},
+    'Selected_muons_pt':                    {"name":'Selected_muons_pt',         "title": "Selected 4#mu p_{T} [GeV]",                 "bin":100, "xmin":0,    "xmax":100},
+    'Selected_muons_eta':                   {"name":'Selected_muons_eta',        "title": "Selected 4#mu #eta",                        "bin":100, "xmin":-3,   "xmax":3},
     
     'n_zjj':                                {"name":'n_zjj',                     "title": "Number of reco. jets",             "bin":20,  "xmin":-0.5, "xmax":19.5},       
     'zjj_invMass':                          {"name":'zjj_invMass',               "title": "M_{jj} [GeV]",                     "bin":100, "xmin":50,   "xmax":150},     
@@ -169,22 +173,18 @@ histoList = {
 
     "MuonPairs_InvMass":                    {"name":'MuonPairs_InvMass',         "title": "M_{4#mu} [GeV]",                   "bin":100, "xmin":115,  "xmax":135},            
     "MuonPairs_InvMass_long_range":         {"name":'MuonPairs_InvMass',         "title": "M_{4#mu} [GeV]",                   "bin":100, "xmin":0,    "xmax":135},            
-    "MuonPair1_total_InvMass":              {"name":'MuonPair1_total_InvMass',   "title": "M_{#mu_{1}#mu_{2}} [GeV]",         "bin":100, "xmin":0,   "xmax":10},  
-    "MuonPair1_total_InvMass_long_range":   {"name":'MuonPair1_total_InvMass',   "title": "M_{#mu_{1}#mu_{2}} [GeV]",         "bin":100, "xmin":0,   "xmax":110},  
-    "MuonPair2_total_InvMass":              {"name":'MuonPair2_total_InvMass',   "title": "M_{#mu_{3}#mu_{4}} [GeV]",         "bin":100, "xmin":0,    "xmax":10},  
+    "MuonPair1_total_InvMass":              {"name":'MuonPair1_total_InvMass',   "title": "M_{#mu_{1}#mu_{2}} [GeV]",         "bin":100, "xmin":-0.5, "xmax":9.5},  
+    "MuonPair1_total_InvMass_long_range":   {"name":'MuonPair1_total_InvMass',   "title": "M_{#mu_{1}#mu_{2}} [GeV]",         "bin":100, "xmin":0,    "xmax":110},  
+    "MuonPair2_total_InvMass":              {"name":'MuonPair2_total_InvMass',   "title": "M_{#mu_{3}#mu_{4}} [GeV]",         "bin":100, "xmin":-0.5, "xmax":9.5},  
     "MuonPair2_total_InvMass_long_range":   {"name":'MuonPair2_total_InvMass',   "title": "M_{#mu_{3}#mu_{4}} [GeV]",         "bin":100, "xmin":0,    "xmax":110},  
  
     "MuonPair1_dR":                         {"name":'MuonPair1_dR',              "title": "Pair1 dR",                         "bin":100, "xmin":0,    "xmax":1},  
     "MuonPair2_dR":                         {"name":'MuonPair2_dR',              "title": "Pair2 dR",                         "bin":100, "xmin":0,    "xmax":1.5},  
     
-    # #"n_DVs":                        {"name":'n_DVs',                      "title": "Number of DV muon pairs",                    "bin":10,  "xmin":0,      "xmax":5},    
-    # #"DV1_Lxyz":                     {"name":'DV1_Lxyz',                   "title": "Pair1 Lxyz",                                 "bin":100, "xmin":0,      "xmax":5},  
-    # # "DV2_Lxyz":                    {"name":'DV2_Lxyz',                   "title": "Pair2 Lxyz",                                 "bin":100, "xmin":-0,     "xmax":2},  
-    # #"RecoMuons_Lxyz":               {"name":'RecoMuons_Lxyz',             "title": "All Lxy",                                    "bin":100, "xmin":0,      "xmax":2},  
-    # # # "n_GlobalDVs":               {"name":'n_GlobalDVs',                "title": "Number of DV all muons",                     "bin":10,  "xmin":0,      "xmax":5},    
-    # # "DV1_invM":                    {"name":'DV1_invM',                   "title": "Invariant mass of DP_1 [GeV]",               "bin":100, "xmin":0,      "xmax":10},  
-    # # "DV2_invM":                    {"name":'DV2_invM',                   "title": "Invariant mass of DP_2 [GeV]",               "bin":100, "xmin":0,      "xmax":10},  
-    # # "SecondaryVertex_Lxyz":        {"name":'SecondaryVertex_Lxyz',       "title": "All Lxy",                                    "bin":100, "xmin":0,      "xmax":2},  
-    # #"n_total_tracks":               {"name":'n_total_tracks',             "title": "Number of DV muon pairs",                    "bin":100,  "xmin":0,     "xmax":100},    
-
+    'RP_noMu_InvM':                         {"name":'RP_noMu_InvM',              "title": "RP_noMu M_{jj} [GeV]",             "bin":100, "xmin":50,   "xmax":150},     
+    
+    "n_DVs":                                {"name":'n_DVs',                     "title": "Number of DV muon pairs",          "bin":5,  "xmin":-0.5,   "xmax":4.5},    
+    "DV1_Lxyz":                             {"name":'DV1_Lxyz',                  "title": "L_{xyz} DV_1 [mm]",                "bin":100, "xmin":0,     "xmax":800},  
+    "DV2_Lxyz":                             {"name":'DV2_Lxyz',                  "title": "L_{xyz} DV_2 [mm]",                "bin":100, "xmin":0,     "xmax":800},  
+    "DV_lxyz":                              {"name":'DV_lxyz',                   "title": "L_{xyz} [mm]",                     "bin":100, "xmin":0,     "xmax":800},  
 }

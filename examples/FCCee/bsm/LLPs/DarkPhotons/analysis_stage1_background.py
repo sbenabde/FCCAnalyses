@@ -124,7 +124,8 @@ class Analysis():
         self.runBatch        = True
         self.batchQueue      = "nextweek"
         self.compGroup       = "group_u_FCC.local_gen"
-        #self.userBatchConfig = "/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/user_config.sh"
+        self.userBatchConfig = "/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/user_config.sh"
+        self.eosType         = "eospublic"
 
 
     def analyzers(self, dframe):
