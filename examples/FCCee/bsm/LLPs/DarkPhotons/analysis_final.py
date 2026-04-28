@@ -1,22 +1,25 @@
 import ROOT
 
-#Input directory where the files produced in the pre-selection stages are
-inputDir = "STAGE1_output"
-#Output directory where the resulting files will be stored
-outputDir = "FINAL_output/signal"
+inputDir = "STAGE1_output"  #Local
+# inputDir = "/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/Stage1_output_23_04_26/" #Central
+outputDir = "FINAL_output/submission/three_bkg"
 
-#Run over the full statistics from stage1 input file
 processList = {
         #Signal
         'dark_photons_mZd360MeV_e_1e-5':{},
         'dark_photons_mZd1100MeV_e_3.12e-6':{},
         'dark_photons_mZd7000MeV_e_2.7e-7':{},
 
+
         #Background
-        #'bkg_ee_qqH_HZZ_4l':{},
-        #'bkg_ee_qqH_HZZ_4mu':{},
- 
+
+        # #Local
+        # 'bkg_ee_qqH_HZZ_4l':{},
+        # 'bkg_ee_qqH_HZZ_4mu':{},
+
+        #Central
         #'wzp6_ee_qqH_HZZ_ecm240':{},
+ 
         #'wzp6_ee_bbH_HZZ_ecm240':{},
         #'wzp6_ee_qqH_ecm240':{},
 
@@ -26,16 +29,16 @@ processList = {
         #'wzp6_ee_ccH_Hmumu_ecm240':{},
         #'wzp6_ee_bbH_Hmumu_ecm240':{},
 
-       #'wzp6_ee_qqH_HZZ_llll_ecm240':{},
+        # 'wzp6_ee_qqH_HZZ_llll_ecm240':{},
 
         #'wzp6_ee_qqH_HWW_ecm240':{},
         #'wzp6_ee_ccH_HWW_ecm240':{},
         #'wzp6_ee_bbH_HWW_ecm240':{},
 
-        # 'wzp6_ee_mumuH_Hbb_ecm240':{},
+        #'wzp6_ee_mumuH_Hbb_ecm240':{},
         
-        #'p8_ee_ZZ_ecm240':{},
-        #'p8_ee_WW_ecm240':{},
+        # 'p8_ee_ZZ_ecm240':{},
+        # 'p8_ee_WW_ecm240':{},
 }
 
 #Need this block to add the cross sections of the self generated samples, otherwise it sets to 1.0 pb
@@ -43,8 +46,8 @@ procDictAdd = {
     'dark_photons_mZd360MeV_e_1e-5':         {"crossSection": 2.543e-06},
     'dark_photons_mZd1100MeV_e_3.12e-6':     {"crossSection": 2.816e-06},
     'dark_photons_mZd7000MeV_e_2.7e-7':      {"crossSection": 1.116e-06},
-    'bkg_ee_qqH_HZZ_4l':                     {"crossSection": 1.229e-05},
-    'bkg_ee_qqH_HZZ_4mu':                    {"crossSection": 3.222e-06},
+    #'bkg_ee_qqH_HZZ_4l':                     {"crossSection": 1.229e-05},
+    #'bkg_ee_qqH_HZZ_4mu':                    {"crossSection": 3.222e-06},
 }
 
 processLabels = {
@@ -162,8 +165,8 @@ cutLabels = {
 histoList = {   
     'n_RecoMuons':                          {"name":'n_RecoMuons',               "title": "Number of reco. muons",            "bin":10,  "xmin":-0.5, "xmax":9.5},
     'RecoMuon_pt':                          {"name":'RecoMuon_pt',               "title": "Reco muons p_{T} [GeV]",           "bin":100, "xmin":0,    "xmax":150},
-    'Selected_muons_pt':                    {"name":'Selected_muons_pt',         "title": "Selected 4#mu p_{T} [GeV]",                 "bin":100, "xmin":0,    "xmax":100},
-    'Selected_muons_eta':                   {"name":'Selected_muons_eta',        "title": "Selected 4#mu #eta",                        "bin":100, "xmin":-3,   "xmax":3},
+    'Selected_muons_pt':                    {"name":'Selected_muons_pt',         "title": "Selected 4#mu p_{T} [GeV]",        "bin":100, "xmin":0,    "xmax":100},
+    'Selected_muons_eta':                   {"name":'Selected_muons_eta',        "title": "Selected 4#mu #eta",               "bin":100, "xmin":-3,   "xmax":3},
     
     'n_zjj':                                {"name":'n_zjj',                     "title": "Number of reco. jets",             "bin":20,  "xmin":-0.5, "xmax":19.5},       
     'zjj_invMass':                          {"name":'zjj_invMass',               "title": "M_{jj} [GeV]",                     "bin":100, "xmin":50,   "xmax":150},     
@@ -173,9 +176,9 @@ histoList = {
 
     "MuonPairs_InvMass":                    {"name":'MuonPairs_InvMass',         "title": "M_{4#mu} [GeV]",                   "bin":100, "xmin":115,  "xmax":135},            
     "MuonPairs_InvMass_long_range":         {"name":'MuonPairs_InvMass',         "title": "M_{4#mu} [GeV]",                   "bin":100, "xmin":0,    "xmax":135},            
-    "MuonPair1_total_InvMass":              {"name":'MuonPair1_total_InvMass',   "title": "M_{#mu_{1}#mu_{2}} [GeV]",         "bin":100, "xmin":-0.5, "xmax":9.5},  
+    "MuonPair1_total_InvMass":              {"name":'MuonPair1_total_InvMass',   "title": "M_{#mu_{1}#mu_{2}} [GeV]",         "bin":100, "xmin":0,    "xmax":10},  
     "MuonPair1_total_InvMass_long_range":   {"name":'MuonPair1_total_InvMass',   "title": "M_{#mu_{1}#mu_{2}} [GeV]",         "bin":100, "xmin":0,    "xmax":110},  
-    "MuonPair2_total_InvMass":              {"name":'MuonPair2_total_InvMass',   "title": "M_{#mu_{3}#mu_{4}} [GeV]",         "bin":100, "xmin":-0.5, "xmax":9.5},  
+    "MuonPair2_total_InvMass":              {"name":'MuonPair2_total_InvMass',   "title": "M_{#mu_{3}#mu_{4}} [GeV]",         "bin":100, "xmin":0, "xmax":10},  
     "MuonPair2_total_InvMass_long_range":   {"name":'MuonPair2_total_InvMass',   "title": "M_{#mu_{3}#mu_{4}} [GeV]",         "bin":100, "xmin":0,    "xmax":110},  
  
     "MuonPair1_dR":                         {"name":'MuonPair1_dR',              "title": "Pair1 dR",                         "bin":100, "xmin":0,    "xmax":1},  

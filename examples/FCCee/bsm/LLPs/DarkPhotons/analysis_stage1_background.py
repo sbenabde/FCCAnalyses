@@ -3,6 +3,8 @@ import ROOT
 import copy
 from addons.FastJet.jetClusteringHelper import ExclusiveJetClusteringHelper
 
+#'module load lxbatch/eossubmit'
+
 ROOT.gInterpreter.Declare("""
 #include <vector>
 #include <cmath>
@@ -12,7 +14,7 @@ std::vector<std::vector<int>> get_best_paired_indices(ROOT::VecOps::RVec<float> 
                                                      ROOT::VecOps::RVec<float> phi, 
                                                      ROOT::VecOps::RVec<float> charge){
     std::vector<std::vector<int>> all_pairs;
-    if (eta.size() < 2) return all_pairs;         //Need at least 4 muons to produce 2 pairs
+    if (eta.size() < 2) return all_pairs;         //Need at least 2 muons to produce pairs (if set to 4, creates bugs for other backgrounds)
 
     std::vector<bool> used(eta.size(), false);
 
@@ -94,7 +96,32 @@ class Analysis():
     def __init__(self, cmdline_args):
         
         self.process_list = {
-            'wzp6_ee_qqH_HZZ_ecm240':{'chunks':10,'fraction':0.01},
+            #Batch submission
+            #'wzp6_ee_qqH_HZZ_ecm240':{'chunks':20},
+            #'wzp6_ee_bbH_HZZ_ecm240':{'chunks':20},
+            
+            #'wzp6_ee_qqH_ecm240':{'chunks':20},
+
+            #'wzp6_ee_mumuH_Hmumu_ecm240':{'chunks':20},
+
+            #'wzp6_ee_qqH_Hmumu_ecm240':{'chunks':20},
+            #'wzp6_ee_ccH_Hmumu_ecm240':{'fraction':0.025},
+            #'wzp6_ee_bbH_Hmumu_ecm240':{'fraction':0.033},
+
+            #'wzp6_ee_qqH_HZZ_llll_ecm240':{'chunks':20},
+
+            #'wzp6_ee_qqH_HWW_ecm240':{'chunks':20},
+            #'wzp6_ee_ccH_HWW_ecm240':{'fraction':0.083},
+            #'wzp6_ee_bbH_HWW_ecm240':{'fraction':0.01},
+
+            #'wzp6_ee_mumuH_Hbb_ecm240':{'chunks':20},
+            
+            'p8_ee_ZZ_ecm240':{'chunks':200},
+            'p8_ee_WW_ecm240':{'chunks':200},
+
+
+            #Run locally
+            #'wzp6_ee_qqH_HZZ_ecm240':{'fraction':0.01},
             #'wzp6_ee_bbH_HZZ_ecm240':{'fraction':0.01},
             #'wzp6_ee_qqH_ecm240':{'fraction':0.01},
 
@@ -116,17 +143,18 @@ class Analysis():
             #'p8_ee_WW_ecm240':{'fraction':0.01},
         }
 
-        self.prod_tag        = 'FCCee/winter2023/IDEA/'
-        self.output_dirEos   = "/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/Stage1_output_20_04_26"
-        self.nCPUS           = 8
-        self.analysis_name   = 'My Analysis'
-        self.n_threads       = 1
-        self.runBatch        = True
-        self.batchQueue      = "nextweek"
-        self.compGroup       = "group_u_FCC.local_gen"
-        self.userBatchConfig = "/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/user_config.sh"
-        self.eosType         = "eospublic"
-
+#run 'module load lxbatch/eossubmit' in terminal before submission
+        self.prod_tag          = 'FCCee/winter2023/IDEA/'
+        self.output_dir        = "/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/Stage1_output_23_04_26/"
+        # self.output_dir        = "STAGE1_output"
+        self.nCPUS             = 4
+        self.analysis_name     = 'My Analysis'
+        self.n_threads         = 1
+        self.run_batch         = True
+        self.batch_queue       = "nextweek"
+        self.comp_group        = "group_u_FCC.local_gen"
+        self.user_batch_config = "/eos/user/s/sbenabde/FCCAnalyses/examples/FCCee/bsm/LLPs/DarkPhotons/user_config.sh"        
+        self.eosType           = "eospublic"
 
     def analyzers(self, dframe):
 
@@ -214,9 +242,10 @@ class Analysis():
 
             .Define("MuonPairs_InvMass", "sqrt(MuonPairs_e*MuonPairs_e - MuonPairs_px*MuonPairs_px - MuonPairs_py*MuonPairs_py - MuonPairs_pz*MuonPairs_pz)")
 
-            .Define("Selected_muons",   "ReconstructedParticle::merge(MuonPair1, MuonPair2)")
-            .Define("N_Selected_muons", "int(Selected_muons.size())")
-            .Define("Selected_muons_pt", "ReconstructedParticle::get_pt(Selected_muons)")   
+            .Define("Selected_muons",     "ReconstructedParticle::merge(MuonPair1, MuonPair2)")
+            .Define("N_Selected_muons",   "int(Selected_muons.size())")
+            .Define("Selected_muons_pt",  "ReconstructedParticle::get_pt(Selected_muons)")   
+            .Define("Selected_muons_eta", "ReconstructedParticle::get_eta(Selected_muons)")   
 
 #---------- Reconstructed electrons ------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -233,7 +262,6 @@ class Analysis():
             .Define("RecoElectron_theta",   "ReconstructedParticle::get_theta(RecoElectrons)")
 		    .Define("RecoElectron_phi",     "ReconstructedParticle::get_phi(RecoElectrons)")
             .Define("RecoElectron_charge",  "ReconstructedParticle::get_charge(RecoElectrons)")
-
 
             .Define("Leptons",              "ReconstructedParticle::merge(RecoMuons, RecoElectrons)")
             .Define("n_Leptons",            "int(Leptons.size())")
@@ -337,6 +365,7 @@ class Analysis():
             "MuonPairs_InvMass",
 
             'Selected_muons_pt',
+            'Selected_muons_eta',
             
             #Reco Jets
             'n_zjj',

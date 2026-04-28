@@ -96,12 +96,12 @@ class Analysis():
             'dark_photons_mZd360MeV_e_1e-5':{},
             'dark_photons_mZd1100MeV_e_3.12e-6':{},
             'dark_photons_mZd7000MeV_e_2.7e-7':{},
-            'bkg_ee_qqH_HZZ_4l':{},
-            'bkg_ee_qqH_HZZ_4mu':{},
+            # 'bkg_ee_qqH_HZZ_4l':{},
+            # 'bkg_ee_qqH_HZZ_4mu':{},
         }
         # self.input_dir = '/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons'
-        self.input_dir = '/eos/user/s/sbenabde/MG5_aMC_v3_5_11/Root_files_HAHM/'
-        self.output_dir = "STAGE1_output"
+        self.input_dir = '/eos/user/s/sbenabde/MG5_aMC_v3_5_11/Root_files_HAHM_rerun'
+        self.output_dir = "STAGE1_output_rerun"
         
         self.analysis_name = 'My Analysis'
         self.n_threads = 1
@@ -163,8 +163,8 @@ class Analysis():
             .Define("MuonPair1_charge",        "ReconstructedParticle::get_charge(MuonPair1)")
             .Define("MuonPair1_total_charge",  "ROOT::VecOps::Sum(MuonPair1_charge)")
             .Define("MuonPair1_InvMass",       "sqrt(MuonPair1_e*MuonPair1_e - MuonPair1_px*MuonPair1_px - MuonPair1_py*MuonPair1_py - MuonPair1_pz*MuonPair1_pz)")
-            .Define("MuonPair1_total_InvMass", "sqrt(MuonPair1_total_e*MuonPair1_total_e - MuonPair1_total_px*MuonPair1_total_px - MuonPair1_total_py*MuonPair1_total_py - MuonPair1_total_pz*MuonPair1_total_pz)")
-            .Define("MuonPair1_dR",            "get_pair_dR(Pair1, RecoMuon_eta, RecoMuon_phi)")    
+            
+            .Define("MuonPair1_total_InvMass", "if (MuonPair1.size() == 2) return sqrt(MuonPair1_total_e*MuonPair1_total_e - MuonPair1_total_px*MuonPair1_total_px - MuonPair1_total_py*MuonPair1_total_py - MuonPair1_total_pz*MuonPair1_total_pz); else {return -1.0f;}")            .Define("MuonPair1_dR",            "get_pair_dR(Pair1, RecoMuon_eta, RecoMuon_phi)")    
             
             .Define("MuonPair2",               "ReconstructedParticle::get(Pair2, RecoMuons)")
 
@@ -181,7 +181,9 @@ class Analysis():
             .Define("MuonPair2_charge",        "ReconstructedParticle::get_charge(MuonPair2)")
             .Define("MuonPair2_total_charge",  "ROOT::VecOps::Sum(MuonPair2_charge)")
             .Define("MuonPair2_InvMass",       "sqrt(MuonPair2_e*MuonPair2_e - MuonPair2_px*MuonPair2_px - MuonPair2_py*MuonPair2_py - MuonPair2_pz*MuonPair2_pz)")
-            .Define("MuonPair2_total_InvMass", "sqrt(MuonPair2_total_e*MuonPair2_total_e - MuonPair2_total_px*MuonPair2_total_px - MuonPair2_total_py*MuonPair2_total_py - MuonPair2_total_pz*MuonPair2_total_pz)")
+           
+            .Define("MuonPair2_total_InvMass", "if (MuonPair2.size() == 2) return sqrt(MuonPair2_total_e*MuonPair2_total_e - MuonPair2_total_px*MuonPair2_total_px - MuonPair2_total_py*MuonPair2_total_py - MuonPair2_total_pz*MuonPair2_total_pz); else {return -1.0f;}")     
+           
             .Define("MuonPair2_dR",            "get_pair_dR(Pair2, RecoMuon_eta, RecoMuon_phi)")    
 
             .Define("MuonPairs_e",             "ROOT::VecOps::Sum(MuonPair1_e) +  ROOT::VecOps::Sum(MuonPair2_e)")
@@ -278,12 +280,12 @@ class Analysis():
             .Define("DV1_X",    "DVertex1.position.x")
             .Define("DV1_Y",    "DVertex1.position.y")
             .Define("DV1_Z",    "DVertex1.position.z")
-            .Define("DV1_Lxyz", "sqrt(DV1_X*DV1_X + DV1_Y*DV1_Y + DV1_Z*DV1_Z)")
+            .Define("DV1_Lxyz", "if (MuonPair1.size() == 2) return sqrt(DV1_X*DV1_X + DV1_Y*DV1_Y + DV1_Z*DV1_Z); else {return -1.0f;}")     
 
             .Define("DV2_X",    "DVertex2.position.x")
             .Define("DV2_Y",    "DVertex2.position.y")
             .Define("DV2_Z",    "DVertex2.position.z")
-            .Define("DV2_Lxyz", "sqrt(DV2_X*DV2_X + DV2_Y*DV2_Y + DV2_Z*DV2_Z)")
+            .Define("DV2_Lxyz", "if (MuonPair2.size() == 2) return sqrt(DV2_X*DV2_X + DV2_Y*DV2_Y + DV2_Z*DV2_Z); else {return -1.0f;}")     
 
             .Define("DV_lxyz", "ROOT::VecOps::RVec<float>{(float)DV1_Lxyz, (float)DV2_Lxyz}")
             .Define("n_DVs",    "(DVertex1.chi2 >= 0 ? 1 : 0) + (DVertex2.chi2 >= 0 ? 1 : 0)")
