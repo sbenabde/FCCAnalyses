@@ -163,6 +163,11 @@ def load_hists(var: str,
     except KeyError:
         backgrounds = {}
 
+
+    plot_config = config['plots'].get(label, {})
+    should_normalize = plot_config.get('normalize', False)
+
+
     hsignal: dict[str, Any] = {}
     for s in signal:
         hsignal[s] = []
@@ -182,7 +187,7 @@ def load_hists(var: str,
                                                config['scale_sig'])
             hist.Scale(scale)
 
-            if config.get('normalize', True):
+            if should_normalize:
                 if hist.Integral() > 0:
                     hist.Scale(1.0 / hist.Integral())
                 else:
@@ -215,7 +220,7 @@ def load_hists(var: str,
                                                config['scale_bkg'])
             hist.Scale(scale)
 
-            if config.get('normalize', True):
+            if should_normalize:
                 if hist.Integral() > 0:
                     hist.Scale(1.0 / hist.Integral())
                 else:
@@ -380,15 +385,17 @@ def runPlots(config: dict[str, Any],
     leg.SetTextFont(42)
 
     for s in hsignal:
-        n_events = hsignal[s][0].Integral(0, -1)
+        n_events = hsignal[s][0].Integral(0, -1) #When Normalized to lumi
+        # n_events = hsignal[s][0].GetEntries() #When Normalized to 1
         leg.AddEntry(hsignal[s][0], script_module.legend[s], "l")
-        leg.AddEntry(ROOT.nullptr, f"{n_events:.0f} events", "")
+        leg.AddEntry(ROOT.nullptr, f"{n_events:.0f} entries", "")
 
     for b in hbackgrounds:
-        n_events = hbackgrounds[b][0].Integral(0, -1)
+        n_events = hbackgrounds[b][0].Integral(0, -1)  #When Normalized to lumi
+        # n_events = hbackgrounds[b][0].GetEntries()  #When Normalized to 1
         target_leg = leg2 if config['split_leg'] else leg
         target_leg.AddEntry(hbackgrounds[b][0], script_module.legend[b], "f")
-        target_leg.AddEntry(ROOT.nullptr, f"{n_events:.0f} events", "")
+        target_leg.AddEntry(ROOT.nullptr, f"{n_events:.0f} entries", "")
 
     yields = {}
     for s in hsignal:
@@ -779,30 +786,41 @@ def draw_plot(config: dict[str, Any],
             return
     h_dummy.GetXaxis().SetLimits(xmin, xmax)
 
-    # y limits
-    if plot_params['stack-sig'] == 'stack':
-        ymin_, ymax_ = get_minmax_range(hStack.GetHists(), xmin, xmax)
-    else:
-        hists_to_check = []
-        if hStackSig.GetNhists() > 0: 
-            hists_to_check.extend(hStackSig.GetHists())
-        if hStackBkg.GetNhists() > 0: 
-            hists_to_check.extend(hStackBkg.GetHists())
-        ymin_, ymax_ = get_minmax_range(hists_to_check, xmin, xmax)
+    
+    # y limits logic
+    hists_to_check = []
+    if hStackSig.GetNhists() > 0: 
+        hists_to_check.extend(hStackSig.GetHists())
+    if hStackBkg.GetNhists() > 0: 
+        hists_to_check.extend(hStackBkg.GetHists())
+    ymax_ = max([h.GetMaximum() for h in hists_to_check]) if hists_to_check else 1.0
 
     if ymin == -1:
-        ymin = ymin_*0.1 if plot_params['yaxis'] == 'log' else 0
+        # For log scale, ymin cannot be 0. 1e-2 is a safe bet for most plots.
+        ymin = 1e-2 if plot_params['yaxis'] == 'log' else 0
         
     if ymax == -1:
         if plot_params['yaxis'] == 'log':
-            # Increase from 100 to something that fits your data better
-            # 50x is usually a good balance for log plots
             ymax = ymax_ * 50. 
         else:
-            ymax = 1.1 * ymax_ 
+            ymax = 1.2 * ymax_ 
 
+    # Apply to the dummy histogram which controls the axis drawing
     h_dummy.SetMaximum(ymax)
     h_dummy.SetMinimum(ymin)
+    
+    # IMPORTANT: Also apply to the Stacks to ensure they don't override h_dummy
+    hStackBkg.SetMaximum(ymax)
+    hStackBkg.SetMinimum(ymin)
+    hStackSig.SetMaximum(ymax)
+    hStackSig.SetMinimum(ymin)
+
+    # if plot_params['stack-sig'] == 'stack':
+    #     hStack.SetMaximum(ymax)
+    #     hStack.SetMinimum(ymin)
+    # else:
+    #     hStackBkg.SetMaximum(ymax)
+    #     hStackBkg.SetMinimum(ymin)
 
     legend.Draw()
     if legend2 is not None:

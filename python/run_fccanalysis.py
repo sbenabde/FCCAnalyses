@@ -55,13 +55,13 @@ def create_condor_config(log_dir: str,
     cfg = 'executable       = $(filename)\n'
 
     cfg += f'Log              = {log_dir}/condor_job.{process_name}.'
-    cfg += '$(ClusterId).$(ProcId).log\n'
+    cfg += '$(ClusterId).log\n'
 
     cfg += f'Output           = {log_dir}/condor_job.{process_name}.'
-    cfg += '$(ClusterId).$(ProcId).out\n'
+    cfg += '$(ClusterId).out\n'
 
     cfg += f'Error            = {log_dir}/condor_job.{process_name}.'
-    cfg += '$(ClusterId).$(ProcId).error\n'
+    cfg += '$(ClusterId).error\n'
 
     cfg += 'getenv           = False\n'
 
@@ -81,9 +81,9 @@ def create_condor_config(log_dir: str,
 
     cfg += 'max_retries      = 3\n'
 
-    cfg += '+JobFlavour      = "%s"\n' % get_element(rdf_module, 'batchQueue')
+    cfg += '+JobFlavour      = "%s"\n' % get_element(rdf_module, 'batch_queue')
 
-    cfg += '+AccountingGroup = "%s"\n' % get_element(rdf_module, 'compGroup')
+    cfg += '+AccountingGroup = "%s"\n' % get_element(rdf_module, 'comp_group')
 
     cfg += 'RequestCpus      = %i\n' % get_element(rdf_module, "nCPUS")
 
@@ -348,12 +348,14 @@ def send_to_batch(args, analysis, chunk_list, sample_name, anapath: str):
     Send jobs to HTCondor batch system.
     '''
     local_dir = os.environ['LOCAL_DIR']
+    experiment_eos_base = "/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/BatchOutput"
+
     current_date = datetime.datetime.fromtimestamp(
         datetime.datetime.now().timestamp()).strftime('%Y-%m-%d_%H-%M-%S')
-    log_dir = os.path.join(local_dir, 'BatchOutputs', current_date,
-                           sample_name)
+    log_dir = os.path.join(experiment_eos_base, current_date, sample_name)
+   
     if not os.path.exists(log_dir):
-        os.system(f'mkdir -p {log_dir}')
+        os.makedirs(log_dir, exist_ok=True)
 
     # Making sure the FCCAnalyses libraries are compiled and installed
     try:
@@ -503,7 +505,7 @@ def run_local(args, analysis, infile_list):
     output_dir = get_attribute(analysis, 'output_dir', '')
     if not args.batch:
         if os.path.isabs(args.output):
-            LOGGER.warning('Provided output path is absolute, "outputDir" '
+            LOGGER.warning('Provided output path is absolute, "output_dir" '
                            'from analysis script will be ignored!')
             outfile_path = args.output
         else:
