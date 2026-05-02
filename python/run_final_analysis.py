@@ -12,7 +12,8 @@ import pathlib
 import json
 import math
 from typing import Any
-
+import os    
+import re
 import ROOT  # type: ignore
 import cppyy  # type: ignore
 from anascript import get_element, get_attribute
@@ -26,23 +27,35 @@ ROOT.gROOT.SetBatch(True)
 
 # _____________________________________________________________________________
 def get_entries(infilepath: str) -> tuple[int, int]:
-    '''
-    Get number of original entries and number of actual entries in the file
-    '''
+
     events_processed = 0
     events_in_ttree = 0
 
     with ROOT.TFile(infilepath, 'READ') as infile:
-        try:
-            events_processed = infile.Get('eventsProcessed').GetVal()
-        except AttributeError:
-            LOGGER.warning('Input file is missing information about '
-                           'original number of events!')
 
         try:
-            events_in_ttree = infile.Get("events").GetEntries()
+            meta = infile.Get('eventsProcessed')
+            if meta:
+                events_processed = meta.GetVal()
+            else:
+                raise AttributeError
+
         except AttributeError:
-            LOGGER.error('Input file is missing "events" TTree!\nAborting...')
+            LOGGER.warning(
+                'Missing eventsProcessed → falling back to TTree entries'
+            )
+            events_processed = -1  # or set equal to tree
+
+        try:
+            tree = infile.Get("events")
+            events_in_ttree = tree.GetEntries()
+
+            # fallback fix (IMPORTANT)
+            if events_processed <= 0:
+                events_processed = events_in_ttree
+
+        except AttributeError:
+            LOGGER.error('Missing "events" TTree!')
             sys.exit(3)
 
     return events_processed, events_in_ttree
@@ -84,7 +97,7 @@ def save_results(results: dict[str, dict[str, Any]],
     if get_attribute(rdf_module, 'saveTabular', False):
         cut_labels: dict[str, str] = get_attribute(rdf_module, 'cutLabels',
                                                    None)
-        tables_path: str = os.path.join(output_dir, 'outputTabular.txt')
+        tables_path: str = os.path.join(output_dir, 'outputTabular.tex')
         LOGGER.info('Saving results in LaTeX tables to:\n%s', tables_path)
         save_tables(results, tables_path, cut_labels)
 
@@ -103,89 +116,181 @@ def save_json(results: dict[str, dict[str, Any]],
 def save_tables(results: dict[str, dict[str, Any]],
                 outpath: str,
                 cut_labels: dict[str, str] = None) -> None:
-    '''
-    Save results into LaTeX tables.
-    '''
-    cut_names: list[str] = list(results[next(iter(results))].keys())
+
+    def latex_safe(s: str) -> str:
+        return (s.replace("_", "\\_")
+                 .replace(">=", "$\\geq$")
+                 .replace("<=", "$\\leq$")
+                 .replace("#", "\\#"))
+
+    cut_names = list(results[next(iter(results))].keys())
     if not cut_names:
-        LOGGER.error('No results found!\nAborting...')
-        sys.exit(3)
+        raise ValueError("No results found")
 
     if cut_labels is None:
-        cut_labels = {}
-        for name in cut_names:
-            cut_labels[name] = f'{name}'
+        cut_labels = {c: c for c in cut_names}
 
-    cut_labels['all_events'] = 'All events'
+    cut_labels["all_events"] = "All events"
 
-    with open(outpath, 'w', encoding='utf-8') as outfile:
-        # Printing the number of events in format of a LaTeX table
-        # Yields
-        outfile.write('Yields:\n')
-        outfile.write('\\begin{table}[H]\n'
-                      '    \\resizebox{\\textwidth}{!}{\n')
 
-        outfile.write('        \\begin{tabular}{|l||')
-        outfile.write('c|' * (len(cut_labels) + 2))  # Number of cuts
-        outfile.write('} \\hline\n')
+    signal_names = [n for n in results if "dark_photons" in n]
+    background_names = [n for n in results if n not in signal_names]
 
-        outfile.write(8 * ' ')
-        outfile.write(' & ')
-        outfile.write(' & '.join(cut_labels.values()))
-        outfile.write(' \\\\ \\hline\n')
+    if len(signal_names) == 0:
+        raise ValueError("No signal samples found")
 
-        for process_name, result in results.items():
-            outfile.write(8 * ' ')
-            outfile.write(process_name)
-            for cut_name in cut_names:
-                cut_result: dict[str, Any] = result[cut_name]
-                outfile.write(' & ')
-                if cut_result["n_events_raw"] == 0.:
-                    outfile.write('0.')
+    if len(background_names) == 0:
+        background_names = []  # signal-only mode
+
+    def get_bkg(cut):
+        return sum(results[b][cut]["n_events"] for b in background_names)
+
+    def get_bkg_unc(cut):
+        return math.sqrt(sum(results[b][cut]["uncertainty"] ** 2 for b in background_names))
+
+
+
+    with open(outpath, "w", encoding="utf-8") as outfile:
+
+        outfile.write("\\begin{table}[H]\n")
+        outfile.write("\\centering\n")
+        outfile.write("\\resizebox{\\textwidth}{!}{\n")
+
+        n_sig = len(signal_names)
+
+        col_format = "|l||" + "c|" * n_sig + "c||" + "c|" * n_sig + "c|" * n_sig + "|"
+        outfile.write(f"\\begin{{tabular}}{{{col_format}}} \\hline\n")
+
+        # HEADER
+        outfile.write(" & ")
+        outfile.write(f"\\multicolumn{{{n_sig}}}{{c||}}{{\\textbf{{Signal}}}} & ")
+
+        if background_names:
+            outfile.write("\\textbf{Bkg} & ")
+        else:
+            outfile.write("\\textbf{No Bkg} & ")
+
+        outfile.write(f"\\multicolumn{{{n_sig}}}{{c||}}{{\\textbf{{$S/B$}}}} & ")
+        outfile.write(f"\\multicolumn{{{n_sig}}}{{c|}}{{\\textbf{{$S/\\sqrt{{S+B}}$}}}} \\\\ \\hline\n")
+
+        # SIGNAL LABELS
+        outfile.write("\\textbf{Selection}")
+
+        for sig in signal_names:
+            match = re.search(r"mZd(\\d+)", sig)
+            label = f"{match.group(1)} MeV" if match else sig
+            outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
+
+        if background_names:
+            outfile.write(" & \\textbf{Background}")
+        else:
+            outfile.write(" & -")
+
+        for sig in signal_names:
+            match = re.search(r"mZd(\\d+)", sig)
+            label = f"{match.group(1)} MeV" if match else sig
+            outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
+
+        for sig in signal_names:
+            match = re.search(r"mZd(\\d+)", sig)
+            label = f"{match.group(1)} MeV" if match else sig
+            outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
+
+        outfile.write(" \\\\ \\hline \\hline\n")
+
+        # CROSS SECTION ROW
+        outfile.write("\\textbf{Cross Section [pb]}")
+        for _ in signal_names:
+            outfile.write(" & -")
+        outfile.write(" & -")
+        for _ in signal_names:
+            outfile.write(" & -")
+        for _ in signal_names:
+            outfile.write(" & -")
+        outfile.write(" \\\\ \\hline \\hline\n")
+
+
+        for cut in cut_names:
+
+            label = latex_safe(cut_labels.get(cut, cut))
+            outfile.write(label)
+
+            s_vals = []
+
+            # signals (UNCHANGED physics)
+            for sig in signal_names:
+                s = results[sig][cut]["n_events"]
+                u = results[sig][cut]["uncertainty"]
+
+                s_vals.append(s)
+                outfile.write(f" & {s:.2f} $\\pm$ {u:.2f}")
+
+            # background
+            if background_names:
+                b = get_bkg(cut)
+                b_u = get_bkg_unc(cut)
+                outfile.write(f" & {b:.2f} $\\pm$ {b_u:.2f}")
+            else:
+                b = 0.0
+                outfile.write(" & -")
+
+            # S/B
+            for s in s_vals:
+                if b > 0:
+                    outfile.write(f" & {s/b:.3f}")
                 else:
-                    outfile.write(f'{cut_result["n_events"]:.2e}')
-                    outfile.write(' $\\pm$ ')
-                    outfile.write(f'{cut_result["uncertainty"]:.2e}')
-            outfile.write(' \\\\\n')
-        outfile.write('        \\hline\n'
-                      '    \\end{tabular}}\n'
-                      '    \\caption{Caption}\n'
-                      '    \\label{tab:my_label}\n'
-                      '\\end{table}')
+                    outfile.write(" & -")
 
-        # Efficiency:
-        outfile.write('\n\nEfficiency:\n')
-        outfile.write('\\begin{table}[H] \n'
-                      '    \\resizebox{\\textwidth}{!}{ \n')
-
-        outfile.write('    \\begin{tabular}{|l||')
-        outfile.write('c|' * len(results))
-        outfile.write('} \\hline\n')
-
-        outfile.write(8 * ' ')
-        outfile.write(' & ')
-        outfile.write(' & '.join(results.keys()))
-        outfile.write(' \\hline \\\\\n')
-
-        for cut_name in cut_names:
-            if cut_name == 'all_events':
-                continue
-            outfile.write(8 * ' ')
-            outfile.write(f'{cut_name}')
-            for result in results.values():
-                efficiency = result[cut_name]['n_events'] / \
-                             result['all_events']['n_events']
-                if efficiency == 0.:
-                    outfile.write(' & 0.')
+            # S/sqrt(S+B)
+            for s in s_vals:
+                if (s + b) > 0:
+                    sig = s / math.sqrt(s + b)
+                    outfile.write(f" & {sig:.3f}")
                 else:
-                    outfile.write(f' & {efficiency:.3g}')
-            outfile.write(' \\\\\n')
+                    outfile.write(" & -")
 
-        outfile.write('        \\hline\n'
-                      '    \\end{tabular}}\n'
-                      '    \\caption{Caption}\n'
-                      '    \\label{tab:my_label}\n'
-                      '\\end{table}\n')
+            outfile.write(" \\\\ \\hline\n")
+
+        # FOOTER
+        outfile.write("\\end{tabular}\n")
+        outfile.write("}\n")
+        outfile.write("\\caption{Signal yields, background, $S/B$, and $S/\\sqrt{S+B}$.}\n")
+        outfile.write("\\label{tab:final_significance_updated}\n")
+        outfile.write("\\end{table}\n")
+
+        # # Efficiency:
+        # outfile.write('\n\nEfficiency:\n')
+        # outfile.write('\\begin{table}[H] \n'
+        #               '    \\resizebox{\\textwidth}{!}{ \n')
+
+        # outfile.write('    \\begin{tabular}{|l||')
+        # outfile.write('c|' * len(results))
+        # outfile.write('} \\hline\n')
+
+        # outfile.write(8 * ' ')
+        # outfile.write(' & ')
+        # outfile.write(' & '.join(results.keys()))
+        # outfile.write(' \\hline \\\\\n')
+
+        # for cut_name in cut_names:
+        #     if cut_name == 'all_events':
+        #         continue
+        #     outfile.write(8 * ' ')
+        #     outfile.write(f'{cut_name}')
+        #     for result in results.values():
+        #         efficiency = result[cut_name]['n_events'] / \
+        #                      result['all_events']['n_events']
+        #         if efficiency == 0.:
+        #             outfile.write(' & 0.')
+        #         else:
+        #             outfile.write(f' & {efficiency:.3g}')
+        #     outfile.write(' \\\\\n')
+
+        # outfile.write('        \\hline\n'
+        #               '    \\end{tabular}}\n'
+        #               '    \\caption{Caption}\n'
+        #               '    \\label{tab:my_label}\n'
+        #               '\\end{table}\n')
 
 
 # __________________________________________________________
@@ -280,16 +385,34 @@ def run(rdf_module, args) -> None:
             file_list[process_name].push_back(infilepath)
 
         indirpath = input_dir + process_name
+
         if os.path.isdir(indirpath):
             info_msg = f'Open directory {indirpath}'
             flist = glob.glob(indirpath + '/chunk*.root')
-            for filepath in flist:
-                info_msg += '\n\t' + filepath
-                chunk_process_events, chunk_events_ttree = \
-                    get_entries(filepath)
-                process_events[process_name] += chunk_process_events
-                events_ttree[process_name] += chunk_events_ttree
-                file_list[process_name].push_back(filepath)
+            if len(flist) > 0:
+                for filepath in flist:
+                    info_msg += '\n\t' + filepath
+                    chunk_process_events, chunk_events_ttree = \
+                        get_entries(filepath)
+                    process_events[process_name] += chunk_process_events
+                    events_ttree[process_name] += chunk_events_ttree
+                    file_list[process_name].push_back(filepath)
+            
+            else:
+                root_files = glob.glob(indirpath + '/*.root')
+
+                if len(root_files) == 0:
+                    LOGGER.warning(f'No ROOT files found in {indirpath}')
+                else:
+                    for filepath in root_files:
+                        info_msg += '\n\t' + filepath
+
+                        nevt, ntree = get_entries(filepath)
+
+                        process_events[process_name] += nevt
+                        events_ttree[process_name] += ntree
+                        file_list[process_name].push_back(filepath)
+
             LOGGER.info(info_msg)
 
     info_msg = 'Processed events:'

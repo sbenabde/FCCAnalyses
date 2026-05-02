@@ -129,11 +129,11 @@ def determine_lumi_scaling(config: dict[str, Any],
                     int_lumi_in_file, config['int_lumi'])
                 scale *= config['int_lumi'] / int_lumi_in_file
 
-            if config['normalize']:
-                if hist.Integral() > 0:
-                    hist.Scale(1.0 / hist.Integral())
-                else:
-                    LOGGER.warning('Histogram %s has 0 integral, cannot normalize.', var)
+            # if config.get('normalize'):
+            #     if hist.Integral() > 0:
+            #         hist.Scale(1.0 / hist.Integral())
+            #     else:
+            #         LOGGER.warning('Histogram %s has 0 integral, cannot normalize.', var)
                 
     else:
         if config['do_scale']:
@@ -270,11 +270,11 @@ def mapHistosFromHistmaker(config: dict[str, Any],
                 hh = copy.deepcopy(h)
                 hh.SetDirectory(0)
 
-            if config.get('normalize'):
-                if hh.Integral() > 0:
-                    hh.Scale(1.0 / hh.Integral())
-                else:
-                    LOGGER.warning('Histogram %s for %s is empty!', hist_name, f)
+            # if config.get('normalize'):
+            #     if hh.Integral() > 0:
+            #         hh.Scale(1.0 / hh.Integral())
+            #     else:
+            #         LOGGER.warning('Histogram %s for %s is empty!', hist_name, f)
 
             hh.Rebin(rebin)
             if len(hsignal[s]) == 0:
@@ -297,11 +297,11 @@ def mapHistosFromHistmaker(config: dict[str, Any],
                 hh = copy.deepcopy(h)
                 hh.SetDirectory(0)
 
-            if config.get('normalize'):
-                if hh.Integral() > 0:
-                    hh.Scale(1.0 / hh.Integral())
-                else:
-                    LOGGER.warning('Histogram %s for %s is empty!', hist_name, f)            
+            # if config.get('normalize'):
+            #     if hh.Integral() > 0:
+            #         hh.Scale(1.0 / hh.Integral())
+            #     else:
+            #         LOGGER.warning('Histogram %s for %s is empty!', hist_name, f)            
                 
             hh.Rebin(rebin)
             if len(hbackgrounds[b]) == 0:
@@ -365,7 +365,7 @@ def runPlots(config: dict[str, Any],
         leg2.SetTextFont(42)
     else:
         legsize = 0.04 * (len(hbackgrounds) + len(hsignal))
-        leg = ROOT.TLegend(0.65, 0.75 - legsize, 0.75, 0.88) #Position labels samples
+        leg = ROOT.TLegend(0.65, 0.82 - legsize, 0.75, 0.88) #Position labels samples
         leg2 = None
 
         if config['leg_position'][0] is not None:
@@ -386,16 +386,16 @@ def runPlots(config: dict[str, Any],
 
     for s in hsignal:
         n_events = hsignal[s][0].Integral(0, -1) #When Normalized to lumi
-        # n_events = hsignal[s][0].GetEntries() #When Normalized to 1
+        n_events = hsignal[s][0].GetEntries()    #When Normalized to 1
         leg.AddEntry(hsignal[s][0], script_module.legend[s], "l")
-        leg.AddEntry(ROOT.nullptr, f"{n_events:.0f} entries", "")
+        # leg.AddEntry(ROOT.nullptr, f"{n_events:.0f} entries", "")
 
     for b in hbackgrounds:
         n_events = hbackgrounds[b][0].Integral(0, -1)  #When Normalized to lumi
         # n_events = hbackgrounds[b][0].GetEntries()  #When Normalized to 1
         target_leg = leg2 if config['split_leg'] else leg
         target_leg.AddEntry(hbackgrounds[b][0], script_module.legend[b], "f")
-        target_leg.AddEntry(ROOT.nullptr, f"{n_events:.0f} entries", "")
+        # target_leg.AddEntry(ROOT.nullptr, f"{n_events:.0f} entries", "")
 
     yields = {}
     for s in hsignal:
@@ -436,6 +436,7 @@ def runPlots(config: dict[str, Any],
     except AttributeError:
         LOGGER.debug('No custom label, using nothing...')
 
+    
     if 'AAAyields' in var:
         plot_params = {'xaxis': 'lin',
                        'yaxis': 'lin',
@@ -574,6 +575,7 @@ def runPlotsHistmaker(config: dict[str, Any],
         colors.append(param.colors[b])
 
     xtitle = hist_cfg['xtitle'] if 'xtitle' in hist_cfg else ""
+    # ytitle = 'Normalized to 1' if config.get('normalize') else "Events"
     ytitle = hist_cfg['ytitle'] if 'ytitle' in hist_cfg else "Events"
     xmin = hist_cfg['xmin'] if 'xmin' in hist_cfg else -1
     xmax = hist_cfg['xmax'] if 'xmax' in hist_cfg else -1
@@ -680,16 +682,22 @@ def draw_plot(config: dict[str, Any],
 
     # Adjust y-axis label
     hist0_name = str(histos[0].GetXaxis().GetTitle())
-    if any(unit in hist0_name for unit in ['GeV', 'TeV']):
-        unit = 'GeV'
-        if 'TeV' in str(histos[0].GetXaxis().GetTitle()):
-            unit = 'TeV'
 
-        bwidth = histos[0].GetBinWidth(1)
-        if bwidth.is_integer():
-            ylabel += f' / {bwidth} {unit}'
-        else:
-            ylabel += f' / {bwidth:.2f} {unit}'
+
+
+    if 'Lumi' in plot_name:
+        if any(u in hist0_name for u in ['GeV', 'TeV']):
+            unit = 'TeV' if 'TeV' in hist0_name else 'GeV'
+            bwidth = histos[0].GetBinWidth(1)
+
+            if float(bwidth).is_integer():
+                ylabel = f"Events / {int(bwidth)} {unit}"
+            else:
+                ylabel = f"Events / {bwidth:.2f} {unit}"
+    else:
+        ylabel = plot_params.get("ytitle", "Normalized to 1")
+        
+
 
     nbins = 1 if not isinstance(xtitle, list) else len(xtitle)
     h_dummy = ROOT.TH1D("h_dummy", "", nbins, 0, nbins)
@@ -708,11 +716,11 @@ def draw_plot(config: dict[str, Any],
             1.5*h_dummy.GetXaxis().GetLabelOffset())
     h_dummy.GetYaxis().SetTitle(ylabel)
 
-    if config.get('normalize'): 
-        for h in histos:
-            integral = h.Integral()
-            if integral != 0:
-                h.Scale(1.0 / integral)
+    # if config.get('normalize'): 
+    #     for h in histos:
+    #         integral = h.Integral()
+    #         if integral != 0:
+    #             h.Scale(1.0 / integral)
 
 
     # define stacked histo
@@ -852,10 +860,11 @@ def draw_plot(config: dict[str, Any],
     latex.DrawLatex(0.41, 0.925, text)
 
     #Luminosity
-    rightText[1] = rightText[1].replace("   ", "")
-    text = '#bf{' + rightText[1] + '}'
-    latex.SetTextSize(0.035)
-    latex.DrawLatex(0.81, 0.925, text)
+    if 'Lumi' in plot_name:
+        rightText[1] = rightText[1].replace("   ", "")
+        text = '#bf{' + rightText[1] + '}'
+        latex.SetTextSize(0.035)
+        latex.DrawLatex(0.81, 0.925, text)
 
     #Process
     text = '#bf{' + ana_tex + '}'
@@ -1155,18 +1164,19 @@ def run(args):
 
     # Label for the integrated luminosity
     config['int_lumi_label'] = None
-    if hasattr(script_module, "intLumiLabel"):
-        config['int_lumi_label'] = script_module.intLumiLabel
-    if config['int_lumi_label'] is None:
-        if config['int_lumi'] >= 1e6:
-            int_lumi_label = config['int_lumi'] / 1e6
-            config['int_lumi_label'] = f'L = {int_lumi_label:.3g} ab^{{-1}}'
-        elif config['int_lumi'] >= 1e3:
-            int_lumi_label = config['int_lumi'] / 1e3
-            config['int_lumi_label'] = f'L = {int_lumi_label:.3g} fb^{{-1}}'
-        else:
-            config['int_lumi_label'] = \
-                f'L = {config["int_lumi"]:.3g} pb^{{-1}}'
+    if config['plots']['Lumi']:
+        if hasattr(script_module, "intLumiLabel"):
+            config['int_lumi_label'] = script_module.intLumiLabel
+        if config['int_lumi_label'] is None:
+            if config['int_lumi'] >= 1e6:
+                int_lumi_label = config['int_lumi'] / 1e6
+                config['int_lumi_label'] = f'L = {int_lumi_label:.3g} ab^{{-1}}'
+            elif config['int_lumi'] >= 1e3:
+                int_lumi_label = config['int_lumi'] / 1e3
+                config['int_lumi_label'] = f'L = {int_lumi_label:.3g} fb^{{-1}}'
+            else:
+                config['int_lumi_label'] = \
+                    f'L = {config["int_lumi"]:.3g} pb^{{-1}}'
 
     # Handle plots for the Histmaker analyses and exit
     if config['ana_type'] == 'histmaker':
