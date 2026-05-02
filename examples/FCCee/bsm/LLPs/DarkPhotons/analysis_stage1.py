@@ -100,8 +100,8 @@ class Analysis():
             # 'bkg_ee_qqH_HZZ_4mu':{},
         }
         # self.input_dir = '/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons'
-        self.input_dir = '/eos/user/s/sbenabde/MG5_aMC_v3_5_11/Root_files_HAHM_rerun'
-        self.output_dir = "STAGE1_output_rerun"
+        self.input_dir = '/eos/user/s/sbenabde/MG5_aMC_v3_5_11/Root_files_HAHM'
+        self.output_dir = '/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/Stage1_output_23_04_26/'
         
         self.analysis_name = 'My Analysis'
         self.n_threads = 1
@@ -263,12 +263,6 @@ class Analysis():
 
 #---------- Vertexing  ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-            .Define("MC_PrimaryVertex",             "FCCAnalyses::MCParticle::get_EventPrimaryVertex(21)(Particle)" )
-            .Define("n_tracks",                     "ReconstructedParticle2Track::getTK_n(EFlowTracks)")    
-            .Define("MC_PrimaryTracks_RP",          "VertexingUtils::SelPrimaryTracks(MCRecoAssociations0, MCRecoAssociations1, ReconstructedParticles, Particle, MC_PrimaryVertex)")
-            .Define("MC_PrimaryTracks",             "ReconstructedParticle2Track::getRP2TRK(MC_PrimaryTracks_RP, EFlowTracks)" )
-            .Define("nPrimaryTracks",               "ReconstructedParticle::get_n(MC_PrimaryTracks_RP)")
-
             .Define("MuonTracks1",   "ReconstructedParticle2Track::getRP2TRK(MuonPair1, EFlowTracks)")
             .Define("DVObject1",     "VertexFitterSimple::VertexFitter_Tk(1, MuonTracks1)")
             .Define("DVertex1",      "VertexingUtils::get_VertexData(DVObject1)")
@@ -315,19 +309,16 @@ class Analysis():
             #DR Muon pairs
             'MuonPair1_InvMass',
             'MuonPair2_InvMass',
-            "MuonPairs_charge",
-            "MuonPairs_InvMass",
             "MuonPair1_dR",
             "MuonPair2_dR",
 
-            'MuonPair1_total_charge',
             'MuonPair1_total_InvMass',
-            'MuonPair2_total_charge',
             'MuonPair2_total_InvMass',        
+            "MuonPairs_InvMass",
 
             'Selected_muons_pt',
             'Selected_muons_eta',
-
+            
             #Reco Jets
             'n_zjj',
             'zjj_e',
@@ -338,12 +329,10 @@ class Analysis():
             'zjj_invMass',
             'zjj_leading_pt',
             'zjj_subleading_pt',
-            
+
             'RP_noMu_InvM',
 
             #Vertexing
-            'n_tracks',
-            'nPrimaryTracks',
             'n_DVs',
             'DV1_Lxyz',
             'DV2_Lxyz',
