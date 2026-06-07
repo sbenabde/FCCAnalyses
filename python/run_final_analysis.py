@@ -1,7 +1,3 @@
-'''
-Run final stage of an analysis
-'''
-
 import os
 import sys
 import time
@@ -25,14 +21,13 @@ LOGGER = logging.getLogger('FCCAnalyses.run_final')
 ROOT.gROOT.SetBatch(True)
 
 
-# _____________________________________________________________________________
+#------------------------------------------------------------------------------
 def get_entries(infilepath: str) -> tuple[int, int]:
 
     events_processed = 0
     events_in_ttree = 0
 
     with ROOT.TFile(infilepath, 'READ') as infile:
-
         try:
             meta = infile.Get('eventsProcessed')
             if meta:
@@ -41,16 +36,12 @@ def get_entries(infilepath: str) -> tuple[int, int]:
                 raise AttributeError
 
         except AttributeError:
-            LOGGER.warning(
-                'Missing eventsProcessed → falling back to TTree entries'
-            )
-            events_processed = -1  # or set equal to tree
-
+            LOGGER.warning('Missing eventsProcessed → falling back to TTree entries')
+            events_processed = -1
         try:
             tree = infile.Get("events")
             events_in_ttree = tree.GetEntries()
 
-            # fallback fix (IMPORTANT)
             if events_processed <= 0:
                 events_processed = events_in_ttree
 
@@ -61,7 +52,7 @@ def get_entries(infilepath: str) -> tuple[int, int]:
     return events_processed, events_in_ttree
 
 
-# _____________________________________________________________________________
+#------------------------------------------------------------------------------
 def get_processes(rdf_module: object) -> list[str]:
     '''
     Get processes from the analysis script or find them in the input directory.
@@ -81,9 +72,10 @@ def get_processes(rdf_module: object) -> list[str]:
     return process_list
 
 
-# _____________________________________________________________________________
+#------------------------------------------------------------------------------
 def save_results(results: dict[str, dict[str, Any]],
-                 rdf_module: object) -> None:
+                 rdf_module: object,
+                 process_dict: dict[str, Any]) -> None:
     '''
     Save results into various formats, depending on the analysis script.
     '''
@@ -97,12 +89,12 @@ def save_results(results: dict[str, dict[str, Any]],
     if get_attribute(rdf_module, 'saveTabular', False):
         cut_labels: dict[str, str] = get_attribute(rdf_module, 'cutLabels',
                                                    None)
-        tables_path: str = os.path.join(output_dir, 'outputTabular.tex')
+        tables_path: str = os.path.join(output_dir, '0.outputTabular.tex')
         LOGGER.info('Saving results in LaTeX tables to:\n%s', tables_path)
-        save_tables(results, tables_path, cut_labels)
+        save_tables(results, tables_path, process_dict, cut_labels)
 
 
-# _____________________________________________________________________________
+#------------------------------------------------------------------------------
 def save_json(results: dict[str, dict[str, Any]],
               outpath: str) -> None:
     '''
@@ -112,26 +104,166 @@ def save_json(results: dict[str, dict[str, Any]],
         json.dump(results, outfile)
 
 
-# _____________________________________________________________________________
+# ------------------------------------------------------------------------------
+# def save_tables(results: dict[str, dict[str, Any]],
+#                            outpath: str,
+#                            process_dict: dict[str, Any],
+#                            cut_labels: dict[str, str] = None) -> None:
+
+#     def latex_safe(s: str) -> str:
+#         return (s.replace(">=", "$\geq$")
+#                  .replace("<=", "$\leq$")
+#                  .replace("#", "\#"))
+
+#     cut_names = list(results[next(iter(results))].keys())
+#     if not cut_names:
+#         raise ValueError("No results found")
+
+#     if cut_labels is None:
+#         cut_labels = {c: c for c in cut_names}
+
+#     cut_labels["all_events"] = "All events"
+
+
+#     signal_names = [n for n in results if "dark_photons" in n]
+#     background_names = [n for n in results if n not in signal_names]
+
+#     if len(signal_names) == 0:
+#         raise ValueError("No signal samples found")
+
+#     if len(background_names) == 0:
+#         background_names = []  # signal-only mode
+
+#     def get_bkg(cut):
+#         return sum(results[b][cut]["n_events"] for b in background_names)
+
+#     def get_bkg_unc(cut):
+#         return math.sqrt(sum(results[b][cut]["uncertainty"] ** 2 for b in background_names))
+
+
+#     with open(outpath, "w", encoding="utf-8") as outfile:
+#         outfile.write("\\begin{table}[H]\n")
+#         outfile.write("\\centering\n")
+#         outfile.write("\\resizebox{\\textwidth}{!}{\n")
+
+#         n_sig = len(signal_names)
+
+#         col_format = "|l||" + "c|" * n_sig + "c||" + "c|" * n_sig + "|"
+#         outfile.write(f"\\begin{{tabular}}{{{col_format}}} \\hline\n")
+
+#         #Header
+#         outfile.write(" & ")
+#         outfile.write(f"\\multicolumn{{{n_sig}}}{{c|}}{{\\textbf{{Signal}}}} & ")
+
+#         if background_names:
+#             outfile.write("\\textbf{Bkg} & ")
+#         else:
+#             outfile.write("\\textbf{No Bkg} & ")
+
+#         outfile.write(f"\\multicolumn{{{n_sig}}}{{c|}}{{\\textbf{{$S/\\sqrt{{S+B}}$}}}} \\\\ \\hline\n")
+
+#         #Signal labels
+#         outfile.write("\\textbf{Selection}")
+
+#         for sig in signal_names:
+#             match = re.search(r"mZd(\d+)", sig)
+#             label = f"{match.group(1)} MeV" if match else sig
+#             outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
+
+#         if background_names:
+#             outfile.write(" & \\textbf{Background}")
+#         else:
+#             outfile.write(" & -")
+
+#         for sig in signal_names:
+#             match = re.search(r"mZd(\d+)", sig)
+#             label = f"{match.group(1)} MeV" if match else sig
+#             outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
+
+#         for sig in signal_names:
+#             match = re.search(r"mZd(\d+)", sig)
+#             label = f"{match.group(1)} MeV" if match else sig
+#             outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
+
+#         outfile.write(" \\\\ \\hline \\hline\n")
+
+#         #Cross sections
+#         outfile.write("\\textbf{Cross Section [pb]}")
+#         for _ in signal_names:
+#             outfile.write(" & -")
+#         outfile.write(" & -")
+#         for _ in signal_names:
+#             outfile.write(" & -")
+#         for _ in signal_names:
+#             outfile.write(" & -")
+#         outfile.write(" \\\\ \\hline \\hline\n")
+
+#         for cut in cut_names:
+#             label = latex_safe(cut_labels.get(cut, cut))
+#             outfile.write(label)
+
+#             s_vals = []
+#             for sig in signal_names:
+#                 s = results[sig][cut]["n_events"]
+#                 u = results[sig][cut]["uncertainty"]
+
+#                 s_vals.append(s)
+#                 outfile.write(f" & {s:.2f} $\\pm$ {u:.2f}")
+
+#             if background_names:
+#                 b = get_bkg(cut)
+#                 b_u = get_bkg_unc(cut)
+#                 outfile.write(f" & {b:.2f} $\\pm$ {b_u:.2f}")
+#             else:
+#                 b = 0.0
+#                 outfile.write(" & -")
+
+#             #S/sqrt(S+B)
+#             for s in s_vals:
+#                 if (s + b) > 0:
+#                     sig = s / math.sqrt(s + b)
+#                     outfile.write(f" & {sig:.3f}")
+#                 else:
+#                     outfile.write(" & -")
+
+#             if cut in ["Preselection", "Total_Selection"]:
+#                 outfile.write(" \\\\ \\hline\n")
+#             else:
+#                 outfile.write(" \\\\\n")
+                
+#         #Footer
+#         outfile.write("\\end{tabular}\n")
+#         outfile.write("}\n")
+#         outfile.write("\\caption{Signal yields, background, $S/B$, and $S/\\sqrt{S+B}$.}\n")
+#         outfile.write("\\label{tab:final_significance_updated}\n")
+#         outfile.write("\\end{table}\n")
+
+       
+#------------------------------------------------------------------------------
 def save_tables(results: dict[str, dict[str, Any]],
-                outpath: str,
-                cut_labels: dict[str, str] = None) -> None:
+                           outpath: str,
+                           process_dict: dict[str, Any],
+                           cut_labels: dict[str, str] = None) -> None:
 
     def latex_safe(s: str) -> str:
-        return (s.replace("_", "\\_")
-                 .replace(">=", "$\\geq$")
+        return (s.replace(">=", "$\\geq$")
                  .replace("<=", "$\\leq$")
                  .replace("#", "\\#"))
 
-    cut_names = list(results[next(iter(results))].keys())
+    #Keep only selected cuts
+    selected_cuts = ["selNone", "Preselection", "Total_Selection"]
+    available_cuts = list(results[next(iter(results))].keys())
+    cut_names = [c for c in selected_cuts if c in available_cuts]
+
     if not cut_names:
-        raise ValueError("No results found")
+        raise ValueError("Required cuts not found in results")
 
     if cut_labels is None:
-        cut_labels = {c: c for c in cut_names}
-
-    cut_labels["all_events"] = "All events"
-
+        cut_labels = {
+            "selNone":          r"Before Selection",
+            "Preselection":     r"Preselection",
+            "Total_Selection" : r"Total Selection",
+    }
 
     signal_names = [n for n in results if "dark_photons" in n]
     background_names = [n for n in results if n not in signal_names]
@@ -139,8 +271,21 @@ def save_tables(results: dict[str, dict[str, Any]],
     if len(signal_names) == 0:
         raise ValueError("No signal samples found")
 
+    def get_mass(name: str) -> float:
+        match = re.search(r"mZd(\d+)MeV", name)
+        return float(match.group(1)) if match else 0.0
+
+    def get_epsilon(name: str) -> float:
+            match = re.search(r"_e_(.*)", name)
+            try:
+                return float(match.group(1)) if match else 0.0
+            except ValueError:
+                return 0.0
+
+    signal_names.sort(key=lambda n: (get_mass(n), get_epsilon(n)))
+    
     if len(background_names) == 0:
-        background_names = []  # signal-only mode
+        background_names = []
 
     def get_bkg(cut):
         return sum(results[b][cut]["n_events"] for b in background_names)
@@ -149,151 +294,57 @@ def save_tables(results: dict[str, dict[str, Any]],
         return math.sqrt(sum(results[b][cut]["uncertainty"] ** 2 for b in background_names))
 
 
-
+        # --- LaTeX Export ---
+    latex_header = r"""
+    \begin{longtable}[c]{|c|c|c||c|c|c|}
+    \caption{Signal yields after each respective selection cut.} \label{tab:yields_all_signal} \\
+    \hline
+    \textbf{mass [GeV]} & $\varepsilon$ & $\sigma$ [pb] & \textbf{Before selection} & \textbf{Preselection} & \textbf{Total Selection} \\ \hline
+    \endfirsthead
+    \hline
+    \textbf{mass [GeV]} & $\varepsilon$ & $\sigma$ [pb] & \textbf{Before selection} & \textbf{Preselection} & \textbf{Total Selection} \\ \hline
+    \endhead
+    """
     with open(outpath, "w", encoding="utf-8") as outfile:
+        outfile.write(latex_header)
 
-        outfile.write("\\begin{table}[H]\n")
-        outfile.write("\\centering\n")
-        outfile.write("\\resizebox{\\textwidth}{!}{\n")
+        last_mass = None
 
-        n_sig = len(signal_names)
-
-        col_format = "|l||" + "c|" * n_sig + "c||" + "c|" * n_sig + "c|" * n_sig + "|"
-        outfile.write(f"\\begin{{tabular}}{{{col_format}}} \\hline\n")
-
-        # HEADER
-        outfile.write(" & ")
-        outfile.write(f"\\multicolumn{{{n_sig}}}{{c||}}{{\\textbf{{Signal}}}} & ")
-
-        if background_names:
-            outfile.write("\\textbf{Bkg} & ")
-        else:
-            outfile.write("\\textbf{No Bkg} & ")
-
-        outfile.write(f"\\multicolumn{{{n_sig}}}{{c||}}{{\\textbf{{$S/B$}}}} & ")
-        outfile.write(f"\\multicolumn{{{n_sig}}}{{c|}}{{\\textbf{{$S/\\sqrt{{S+B}}$}}}} \\\\ \\hline\n")
-
-        # SIGNAL LABELS
-        outfile.write("\\textbf{Selection}")
-
+        #Signal rows
         for sig in signal_names:
-            match = re.search(r"mZd(\\d+)", sig)
-            label = f"{match.group(1)} MeV" if match else sig
-            outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
+            current_mass = get_mass(sig)
+            
+            #Draw a hline between different mass groups
+            if last_mass is not None and current_mass != last_mass:
+                outfile.write(r"\hline" + "\n")
+            last_mass = current_mass
 
-        if background_names:
-            outfile.write(" & \\textbf{Background}")
-        else:
-            outfile.write(" & -")
+            #Extract mass and epsilon string
+            match = re.search(r"mZd(\d+)MeV_e_(.*)", sig)
+            
+            xsec = process_dict[sig].get("crossSection", 0.0)
+            if match:
+                mev_val = int(match.group(1))
+                gev_val = mev_val / 1000.0
+                epsilon_raw = match.group(2)
+                epsilon_formatted = epsilon_raw.replace("e", r"\times 10^{") + "}" if "e" in epsilon_raw else epsilon_raw
+                outfile.write(f"{gev_val:g} & ${epsilon_formatted}$ & {xsec}")
+            else:
+                # Fallback
+                outfile.write(f"{sig} & -")
 
-        for sig in signal_names:
-            match = re.search(r"mZd(\\d+)", sig)
-            label = f"{match.group(1)} MeV" if match else sig
-            outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
-
-        for sig in signal_names:
-            match = re.search(r"mZd(\\d+)", sig)
-            label = f"{match.group(1)} MeV" if match else sig
-            outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
-
-        outfile.write(" \\\\ \\hline \\hline\n")
-
-        # CROSS SECTION ROW
-        outfile.write("\\textbf{Cross Section [pb]}")
-        for _ in signal_names:
-            outfile.write(" & -")
-        outfile.write(" & -")
-        for _ in signal_names:
-            outfile.write(" & -")
-        for _ in signal_names:
-            outfile.write(" & -")
-        outfile.write(" \\\\ \\hline \\hline\n")
-
-
-        for cut in cut_names:
-
-            label = latex_safe(cut_labels.get(cut, cut))
-            outfile.write(label)
-
-            s_vals = []
-
-            # signals (UNCHANGED physics)
-            for sig in signal_names:
+            for cut in cut_names:
                 s = results[sig][cut]["n_events"]
                 u = results[sig][cut]["uncertainty"]
-
-                s_vals.append(s)
                 outfile.write(f" & {s:.2f} $\\pm$ {u:.2f}")
+                
+            outfile.write(r" \\" + "\n")
 
-            # background
-            if background_names:
-                b = get_bkg(cut)
-                b_u = get_bkg_unc(cut)
-                outfile.write(f" & {b:.2f} $\\pm$ {b_u:.2f}")
-            else:
-                b = 0.0
-                outfile.write(" & -")
+        # Table Footer        
+        outfile.write(r"\hline" + "\n")
+        outfile.write(r"\end{longtable}" + "\n")
+#----------------------------------------------------------------------------------------
 
-            # S/B
-            for s in s_vals:
-                if b > 0:
-                    outfile.write(f" & {s/b:.3f}")
-                else:
-                    outfile.write(" & -")
-
-            # S/sqrt(S+B)
-            for s in s_vals:
-                if (s + b) > 0:
-                    sig = s / math.sqrt(s + b)
-                    outfile.write(f" & {sig:.3f}")
-                else:
-                    outfile.write(" & -")
-
-            outfile.write(" \\\\ \\hline\n")
-
-        # FOOTER
-        outfile.write("\\end{tabular}\n")
-        outfile.write("}\n")
-        outfile.write("\\caption{Signal yields, background, $S/B$, and $S/\\sqrt{S+B}$.}\n")
-        outfile.write("\\label{tab:final_significance_updated}\n")
-        outfile.write("\\end{table}\n")
-
-        # # Efficiency:
-        # outfile.write('\n\nEfficiency:\n')
-        # outfile.write('\\begin{table}[H] \n'
-        #               '    \\resizebox{\\textwidth}{!}{ \n')
-
-        # outfile.write('    \\begin{tabular}{|l||')
-        # outfile.write('c|' * len(results))
-        # outfile.write('} \\hline\n')
-
-        # outfile.write(8 * ' ')
-        # outfile.write(' & ')
-        # outfile.write(' & '.join(results.keys()))
-        # outfile.write(' \\hline \\\\\n')
-
-        # for cut_name in cut_names:
-        #     if cut_name == 'all_events':
-        #         continue
-        #     outfile.write(8 * ' ')
-        #     outfile.write(f'{cut_name}')
-        #     for result in results.values():
-        #         efficiency = result[cut_name]['n_events'] / \
-        #                      result['all_events']['n_events']
-        #         if efficiency == 0.:
-        #             outfile.write(' & 0.')
-        #         else:
-        #             outfile.write(f' & {efficiency:.3g}')
-        #     outfile.write(' \\\\\n')
-
-        # outfile.write('        \\hline\n'
-        #               '    \\end{tabular}}\n'
-        #               '    \\caption{Caption}\n'
-        #               '    \\label{tab:my_label}\n'
-        #               '\\end{table}\n')
-
-
-# __________________________________________________________
 def run(rdf_module, args) -> None:
     '''
     Let's start.
@@ -473,8 +524,12 @@ def run(rdf_module, args) -> None:
             # Get process information from process directory
             try:
                 xsec = process_dict[process_name]["crossSection"]
+                br_sf = process_dict[process_name].get("scaleFactor", 1.0)
+                br_sfH = process_dict[process_name].get("scaleFactorHiggs", 1.0)
             except KeyError:
                 xsec = 1.0
+                br_sf = 1.0
+                br_sfH = 1.0                
                 LOGGER.warning('Cross-section value not found for process '
                                '"%s"!\nUsing 1.0...', process_name)
 
@@ -577,8 +632,7 @@ def run(rdf_module, args) -> None:
 
         if do_scale:
             LOGGER.info('Scaling cut yields...')
-            all_events = all_events_raw * 1. * gen_sf * \
-                int_lumi / process_events[process_name]
+            all_events = all_events_raw * 1. * gen_sf * int_lumi / process_events[process_name]
             uncertainty = ROOT.Math.sqrt(all_events_raw) * gen_sf * \
                 int_lumi / process_events[process_name]
         else:
@@ -595,10 +649,9 @@ def run(rdf_module, args) -> None:
             cut_result['n_events_raw'] = count_list[i].GetValue()
             if do_scale:
                 cut_result['n_events'] = \
-                    cut_result['n_events_raw'] * 1. * gen_sf * \
-                    int_lumi / process_events[process_name]
+                    cut_result['n_events_raw'] * 1. * gen_sf * int_lumi / process_events[process_name]
                 cut_result['uncertainty'] = \
-                    math.sqrt(cut_result['n_events_raw']) * gen_sf * \
+                    math.sqrt(cut_result['n_events_raw']) * gen_sf  * \
                     int_lumi / process_events[process_name]
             else:
                 cut_result['n_events'] = cut_result['n_events_raw']
@@ -642,7 +695,7 @@ def run(rdf_module, args) -> None:
                     hist_name = hist.GetName() + '_raw'
                     outfile.WriteObject(hist.GetValue(), hist_name)
                     if do_scale:
-                        hist.Scale(gen_sf * int_lumi /
+                        hist.Scale(gen_sf * int_lumi  /
                                    process_events[process_name])
                     outfile.WriteObject(hist.GetValue(), hist.GetName())
 
@@ -664,6 +717,12 @@ def run(rdf_module, args) -> None:
                     outfile.WriteObject(param, param.GetName())
 
                     param = ROOT.TParameter(float)("crossSection", xsec)
+                    outfile.WriteObject(param, param.GetName())
+                    
+                    param = ROOT.TParameter(float)("scaleFactor", br_sf)
+                    outfile.WriteObject(param, param.GetName())
+                    
+                    param = ROOT.TParameter(float)("scaleFactorHiggs", br_sfH)
                     outfile.WriteObject(param, param.GetName())
 
                     param = ROOT.TParameter(float)("kfactor", kfactor)
@@ -701,6 +760,12 @@ def run(rdf_module, args) -> None:
                         param = ROOT.TParameter(float)("crossSection", xsec)
                         outfile.WriteObject(param, param.GetName())
 
+                        param = ROOT.TParameter(float)("scaleFactor", br_sf)
+                        outfile.WriteObject(param, param.GetName())
+
+                        param = ROOT.TParameter(float)("scaleFactorHiggs", br_sfH)
+                        outfile.WriteObject(param, param.GetName())
+
                         param = ROOT.TParameter(float)("kfactor", kfactor)
                         outfile.WriteObject(param, param.GetName())
 
@@ -727,7 +792,7 @@ def run(rdf_module, args) -> None:
                     sys.exit(3)
 
     # Save results either to JSON or LaTeX tables
-    save_results(results, rdf_module)
+    save_results(results, rdf_module, process_dict)
 
     elapsed_time = time.time() - start_time
 
@@ -742,7 +807,7 @@ def run(rdf_module, args) -> None:
     info_msg += '\n'
     LOGGER.info(info_msg)
 
-
+#------------------------------------------------------------------------------
 def run_final(parser):
     '''
     Run final stage of the analysis.
