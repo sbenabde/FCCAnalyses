@@ -41,7 +41,7 @@ The **proc_card_HAHM.dat** in this folder generates the process
 > $$e^+e^- \to Z h, Z \to qq, h \to Z_D Z_D, Z_D \to \mu^+\mu^-$$ 
 
 at a center-of-mass energy of 240 GeV (Zh pole at the FCC-ee), for dark photons with a mass $$m_{Z_D}$$= 5 GeV and a coupling constant
-$$\varepsilon= 10^{-6}$$. The dark scalar is decoupled by fixing the dark scalar mass to $$m_{H_s}$$=200 GeV and the coupling $$\kappa$$ is set to $$10^{-3}$$. \
+$$\varepsilon= 10^{-6}$$. The dark scalar is decoupled by fixing the dark scalar mass to $$m_{H_s}$$=200 GeV and the coupling $$\kappa$$ is set to $$10^{-3}$$. 
 
 Download the **proc_card_HAHM.dat**, move it to the MG5_aMC_v3.4.1/ directory and while standing in the MG5_aMC_v3.4.1/ directory, run it with 
 
