@@ -3,7 +3,12 @@ Authors: Sarah Ben Abdesselem and Axel Gallén
 This folder contains all the instructions and files needed to generate long lived dark photon samples produced in the HAHM model https://github.com/davidrcurtin/HAHM.
 
 ## Setting up the FCCAnalyses environment
-The FCCAnalyses framework is the software specifically designed for FCC related analyses. It is necessary to setup the FCCAnalyses environemnt with the correct key4hep version, and stay on that same key4hep version during the entire analysis, to avoid any version mismatch between python, ROOT and the EDM4HEP output formats. The recommended version is the 2024-03-10 release. Setup the environment as follows:
+The FCCAnalyses framework is the software specifically designed for FCC related analyses. It is necessary to setup the FCCAnalyses environemnt with the correct key4hep version, and stay on that same key4hep version during the entire analysis, to avoid any version mismatch between python, ROOT and the EDM4HEP output formats. 
+
+> [!IMPORTANT]
+> The recommended version is the 2024-03-10 release. 
+
+Setup the environment as follows:
 
 ```
 source /cvmfs/sw.hsf.org/key4hep/setup.sh -r 2024-03-10
@@ -20,7 +25,9 @@ fccanalysis build -j
 Once the framework is setup, you'll need to download two files:
 - **MadGraph** from https://launchpad.net/mg5amcnlo
 - **The HAHM model** MadGraph extension from https://github.com/davidrcurtin/HAHM \
-We are using the v_5.3.11 version of MadGraph and the v3 version of the HAHM model extension
+
+> [!NOTE]
+> We are using the v_5.3.11 version of MadGraph and the v3 version of the HAHM model extension
 
 Import the MadGraph tarball and the HAHM model zip file to your eos space. If you're working from your terminal, do this with the commands
 
@@ -77,7 +84,7 @@ Then download the dark_photon_pythia_HAHM.cmnd file in this folder. Make sure to
 ```
 Beams:LHEF = /eos/user/u/username/MG5_aMC_v3_5_11/dark_photons_mZd360MeV_e_9.7e-7.lhe
 ```
-corresponds to the *absolute* path to the .lhe file. \
+corresponds to the *absolute* path to the .lhe file. 
 
 Now you can generate the .root file with 
 
