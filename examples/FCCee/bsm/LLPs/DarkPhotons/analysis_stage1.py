@@ -93,15 +93,14 @@ class Analysis():
     def __init__(self, cmdline_args):
 
         self.process_list = {
-            'dark_photons_mZd360MeV_e_1e-5':{},
-            'dark_photons_mZd1100MeV_e_3.12e-6':{},
-            'dark_photons_mZd7000MeV_e_2.7e-7':{},
-            # 'bkg_ee_qqH_HZZ_4l':{},
-            # 'bkg_ee_qqH_HZZ_4mu':{},
-        }
+        #Signal
+        'dark_photons_mZd4800MeV_e_8.7e-7': {},
+        'dark_photons_mZd5400MeV_e_4.7e-7': {},
+}
+  
         # self.input_dir = '/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons'
-        self.input_dir = '/eos/user/s/sbenabde/MG5_aMC_v3_5_11/Root_files_HAHM'
-        self.output_dir = '/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/Stage1_output_23_04_26/'
+        self.input_dir = '/eos/user/s/sbenabde/MG5_aMC_v3_5_11/Root_files_HAHM_New'
+        self.output_dir = '/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/Stage1_output_signal'
         
         self.analysis_name = 'My Analysis'
         self.n_threads = 1
@@ -114,18 +113,14 @@ class Analysis():
         TTree_Muon_Name = 'Muon_objIdx'
         TTree_Electron_Name = 'Electron_objIdx'
         TTree_EflowTrack_Name = '_EFlowTrack_trackStates'
-        TTree_MCRecoAssociations0 = '_MCRecoAssociations_rec'
-        TTree_MCRecoAssociations1 = '_MCRecoAssociations_sim'
             
         dframe2 = (
             dframe
-            .Alias("Particle0", f"{TTree_Branch_Name_parents}.index")
-            .Alias("Particle1", f"{TTree_Branch_Name_daughters}.index")
-            .Alias('Muon0', f"{TTree_Muon_Name}.index")
-            .Alias('Electron0', f"{TTree_Electron_Name}.index")
+            .Alias("Particle0",   f"{TTree_Branch_Name_parents}.index")
+            .Alias("Particle1",   f"{TTree_Branch_Name_daughters}.index")
+            .Alias('Muon0',       f"{TTree_Muon_Name}.index")
+            .Alias('Electron0',   f"{TTree_Electron_Name}.index")
             .Alias('EFlowTracks', f"{TTree_EflowTrack_Name}")
-            .Alias("MCRecoAssociations0", f"{TTree_MCRecoAssociations0}.index")
-            .Alias("MCRecoAssociations1", f"{TTree_MCRecoAssociations1}.index")
 
 #---------- Reconstructed muons ------------------------------------------------------------------------------------------------------------------------------------------------------
             .Define("RecoMuons",        "ReconstructedParticle::get(Muon0, ReconstructedParticles)")
@@ -198,6 +193,8 @@ class Analysis():
             .Define("N_Selected_muons",        "int(Selected_muons.size())")
             .Define("Selected_muons_pt",       "ReconstructedParticle::get_pt(Selected_muons)")   
             .Define("Selected_muons_eta",      "ReconstructedParticle::get_eta(Selected_muons)")   
+            .Define("Selected_muons_phi",      "ReconstructedParticle::get_phi(Selected_muons)")   
+            .Define("Selected_muons_all_phi",  "ROOT::VecOps::Sum(Selected_muons_phi)")   
 
 #---------- Reconstructed electrons ------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -247,11 +244,15 @@ class Analysis():
             .Define("zjj_py", "FCCAnalyses::JetClusteringUtils::get_py(jets_durham2_noMu)")
             .Define("zjj_pz", "FCCAnalyses::JetClusteringUtils::get_pz(jets_durham2_noMu)")
             .Define("zjj_pt", "return sqrt(zjj_px*zjj_px + zjj_py*zjj_py)")
+            .Define("zjj_phi", "FCCAnalyses::JetClusteringUtils::get_phi(jets_durham2_noMu)")
 
             .Define("n_zjj",  "int(zjj_e.size())")
             
             .Define("zjj_leading_pt",    "if (n_zjj > 0) return zjj_pt[0]; else return float(-1.0);")
             .Define("zjj_subleading_pt", "if (n_zjj > 1) return zjj_pt[1]; else return float(-1.0);")
+
+            .Define("leading_phi",       "if (n_zjj > 0) return zjj_phi[0]; else return float(-999.0);")
+            .Define("subleading_phi",    "if (n_zjj > 1) return zjj_phi[1]; else return float(-999.0);")
 
             .Define("zjj_e_sum",  "if (n_zjj>=2) return float(zjj_e.at(0)  + zjj_e.at(1));  else return float(-1.);")
             .Define("zjj_px_sum", "if (n_zjj>=2) return float(zjj_px.at(0) + zjj_px.at(1)); else return float(-1.);")
@@ -260,7 +261,7 @@ class Analysis():
             .Define("zjj_pt_sum", "if (n_zjj>=2) return float(sqrt((zjj_px_sum*zjj_px_sum) + (zjj_py_sum*zjj_py_sum))); else return float(-1.);")           
 
             .Define("zjj_invMass","if (n_zjj>=2) return float(sqrt(zjj_e_sum*zjj_e_sum - (zjj_px_sum*zjj_px_sum + zjj_py_sum*zjj_py_sum + zjj_pz_sum*zjj_pz_sum))); else return float(-1.);")
-
+            
 #---------- Vertexing  ------------------------------------------------------------------------------------------------------------------------------------------------------
 
             .Define("MuonTracks1",   "ReconstructedParticle2Track::getRP2TRK(MuonPair1, EFlowTracks)")
@@ -271,18 +272,19 @@ class Analysis():
             .Define("DVObject2",     "VertexFitterSimple::VertexFitter_Tk(1, MuonTracks2)")
             .Define("DVertex2",      "VertexingUtils::get_VertexData(DVObject2)")
 
-            .Define("DV1_X",    "DVertex1.position.x")
-            .Define("DV1_Y",    "DVertex1.position.y")
-            .Define("DV1_Z",    "DVertex1.position.z")
-            .Define("DV1_Lxyz", "if (MuonPair1.size() == 2) return sqrt(DV1_X*DV1_X + DV1_Y*DV1_Y + DV1_Z*DV1_Z); else {return -1.0f;}")     
+            .Define("DV1_X",         "DVertex1.position.x")
+            .Define("DV1_Y",         "DVertex1.position.y")
+            .Define("DV1_Z",         "DVertex1.position.z")
 
-            .Define("DV2_X",    "DVertex2.position.x")
-            .Define("DV2_Y",    "DVertex2.position.y")
-            .Define("DV2_Z",    "DVertex2.position.z")
-            .Define("DV2_Lxyz", "if (MuonPair2.size() == 2) return sqrt(DV2_X*DV2_X + DV2_Y*DV2_Y + DV2_Z*DV2_Z); else {return -1.0f;}")     
+            .Define("DV1_Lxyz",      "if (MuonPair1.size() == 2) return sqrt(DV1_X*DV1_X + DV1_Y*DV1_Y + DV1_Z*DV1_Z); else {return -1.0f;}")     
 
-            .Define("DV_lxyz", "ROOT::VecOps::RVec<float>{(float)DV1_Lxyz, (float)DV2_Lxyz}")
-            .Define("n_DVs",    "(DVertex1.chi2 >= 0 ? 1 : 0) + (DVertex2.chi2 >= 0 ? 1 : 0)")
+            .Define("DV2_X",         "DVertex2.position.x")
+            .Define("DV2_Y",         "DVertex2.position.y")
+            .Define("DV2_Z",         "DVertex2.position.z")
+            .Define("DV2_Lxyz",      "if (MuonPair2.size() == 2) return sqrt(DV2_X*DV2_X + DV2_Y*DV2_Y + DV2_Z*DV2_Z); else {return -1.0f;}")     
+
+            .Define("DV_lxyz",       "ROOT::VecOps::RVec<float>{(float)DV1_Lxyz, (float)DV2_Lxyz}")
+            .Define("n_DVs",         "(DVertex1.chi2 >= 0 ? 1 : 0) + (DVertex2.chi2 >= 0 ? 1 : 0)")
 
         )
         return dframe2
@@ -318,7 +320,7 @@ class Analysis():
 
             'Selected_muons_pt',
             'Selected_muons_eta',
-            
+
             #Reco Jets
             'n_zjj',
             'zjj_e',

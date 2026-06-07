@@ -108,7 +108,7 @@ class Analysis():
             #'wzp6_ee_ccH_Hmumu_ecm240':{'fraction':0.025},
             #'wzp6_ee_bbH_Hmumu_ecm240':{'fraction':0.033},
 
-            #'wzp6_ee_qqH_HZZ_llll_ecm240':{'chunks':20},
+            'wzp6_ee_qqH_HZZ_llll_ecm240':{'chunks':20},
 
             #'wzp6_ee_qqH_HWW_ecm240':{'chunks':20},
             #'wzp6_ee_ccH_HWW_ecm240':{'fraction':0.083},
@@ -173,8 +173,6 @@ class Analysis():
             .Alias('Muon0', f"{TTree_Muon_Name}.index")
             .Alias('Electron0', f"{TTree_Electron_Name}.index")
             .Alias('EFlowTracks', f"{TTree_EflowTrack_Name}")
-            .Alias("MCRecoAssociations0", f"{TTree_MCRecoAssociations0}.index")
-            .Alias("MCRecoAssociations1", f"{TTree_MCRecoAssociations1}.index")
 
 #---------- Reconstructed muons ------------------------------------------------------------------------------------------------------------------------------------------------------
             .Define("RecoMuons",        "ReconstructedParticle::get(Muon0, ReconstructedParticles)")
@@ -311,7 +309,7 @@ class Analysis():
             .Define("zjj_invMass","if (n_zjj>=2) return float(sqrt(zjj_e_sum*zjj_e_sum - (zjj_px_sum*zjj_px_sum + zjj_py_sum*zjj_py_sum + zjj_pz_sum*zjj_pz_sum))); else return float(-1.);")
 
 #---------- Vertexing  ------------------------------------------------------------------------------------------------------------------------------------------------------
-
+            
             .Define("MuonTracks1",   "ReconstructedParticle2Track::getRP2TRK(MuonPair1, EFlowTracks)")
             .Define("DVObject1",     "VertexFitterSimple::VertexFitter_Tk(1, MuonTracks1)")
             .Define("DVertex1",      "VertexingUtils::get_VertexData(DVObject1)")

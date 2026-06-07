@@ -11,9 +11,10 @@ ana_tex        = 'e^{+}e^{-} #rightarrow Zh, Z #rightarrow qq, h #rightarrow Z_{
 delphesVersion = '3.4.2'
 energy         = 240
 collider       = 'FCC-ee'
-inputDir       = "FINAL_output/submission/three_bkg/"
-formats        = ['png']
+inputDir       = "/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/Final_output_backgrounds/three_bkgs/"
+formats        = ['png', 'pdf']
 yaxis          = ['lin','log']
+# xaxis          = ['lin', 'log']
 stacksig       = ['nostack']
 outdir         = '/eos/user/s/sbenabde/PLOTS_output/submission/three_bkg'
 splitLeg       = False
@@ -31,20 +32,19 @@ variables = [
             'zjj_subleading_pt',
 
             'MuonPairs_InvMass',
-            'MuonPairs_InvMass_long_range',
+            # 'MuonPairs_InvMass_long_range',
             'MuonPair1_total_InvMass',
-            'MuonPair1_total_InvMass_long_range',
+            # 'MuonPair1_total_InvMass_long_range',
             'MuonPair2_total_InvMass',
-            'MuonPair2_total_InvMass_long_range',
+            # 'MuonPair2_total_InvMass_long_range',
+            
             'MuonPair1_dR',
             'MuonPair2_dR',
 
-            'RP_noMu_InvM',
-
-            'n_DVs',
             'DV1_Lxyz',
             'DV2_Lxyz',
             'DV_lxyz',
+            'n_DVs'
 ]
 
 #Dictionary with the list of selections to be plotted for this analysis. The name of the selections should be the same than in the final selection
@@ -52,32 +52,27 @@ selections = {}
 selections['Lumi']  = [
     "selNone",
     "Preselection",
-    "Leptonic_InvM",
     "4mu_InvM",
-    'DV_lxyz',
-    "Full_selection",
-
+    "Leptonic_InvM",
+    "DV_lxyz",
+    "Total_Selection",
 ]
 selections['Normalize']  = [
     "selNone",
     "Preselection",
-    "Leptonic_InvM",
     "4mu_InvM",
-    'DV_lxyz',
-    "Full_selection",
-
+    "Leptonic_InvM",
+    "DV_lxyz",
+    "Total_Selection",
 ]
 
 extralabel = {}
 extralabel['selNone'] =         r"No selection"
 extralabel['Preselection'] =    r"Preselection"
-extralabel['Z-mass']  =         r"n_{zjj} >= 2 & 70 < m_{Z} < 110 GeV"
-extralabel['Full_Zselection'] = r"Full Z Selection"
-extralabel['Leptonic_InvM'] =   r"M_{2#mu} < 11 GeV"
-extralabel['4mu_InvM'] =        r"120 GeV < M_{4#mu} < 130 GeV"
-extralabel['DV_lxyz'] =         r"L_{xyz} < 3mm"
-extralabel['Full_selection'] =  r"Full Selection"
-
+extralabel['4mu_InvM'] =        r"#splitline{Preselection}{120 GeV < M_{4#mu} < 130 GeV}"
+extralabel['Leptonic_InvM'] =   r"#splitline{Preselection}{#splitline{120 GeV < M_{4#mu} < 130 GeV}{M_{2#mu} < 11 GeV}}"
+extralabel['DV_lxyz'] =         r"#splitline{Preselection}{#splitline{120 GeV < M_{4#mu} < 130 GeV}{#splitline{M_{2#mu} < 11 GeV}{L_{xyz} > 3 mm}}}"
+extralabel['Total_Selection'] = r"Total Selection"
 
 
 plots = {}
@@ -86,6 +81,10 @@ my_samples = {
                 'dark_photons_mZd360MeV_e_1e-5':['dark_photons_mZd360MeV_e_1e-5'],
                 'dark_photons_mZd1100MeV_e_3.12e-6':['dark_photons_mZd1100MeV_e_3.12e-6'],
                 'dark_photons_mZd7000MeV_e_2.7e-7':['dark_photons_mZd7000MeV_e_2.7e-7'],
+
+   
+
+                # 'dark_photons_mZd10000MeV_e_6.7e-7':['dark_photons_mZd10000MeV_e_6.7e-7'],
                 },
         'backgrounds':{ #'wzp6_ee_qqH_HZZ_ecm240':['wzp6_ee_qqH_HZZ_ecm240'],
 
@@ -120,9 +119,12 @@ plots['Normalize'] = {**my_samples, 'normalize': True, 'ytitle': 'Normalized to 
 
 linestyle = {}
 colors = {}
-colors['dark_photons_mZd360MeV_e_1e-5']     = ROOT.kViolet+7
-colors['dark_photons_mZd1100MeV_e_3.12e-6'] = ROOT.kMagenta+3
-colors['dark_photons_mZd7000MeV_e_2.7e-7']  = ROOT.kPink+8
+colors['dark_photons_mZd360MeV_e_1e-5']      = ROOT.kViolet+7
+colors['dark_photons_mZd1100MeV_e_3.12e-6']  = ROOT.kMagenta+3
+colors['dark_photons_mZd7000MeV_e_2.7e-7']   = ROOT.kPink+8
+colors['dark_photons_mZd10000MeV_e_6.7e-7']  = ROOT.kPink-8
+
+colors['dark_photons_mZd10000MeV_e_2.7e-7']  = ROOT.kPink-8
 
 colors['bkg_ee_qqH_HZZ_4l']  = ROOT.kViolet-9
 colors['bkg_ee_qqH_HZZ_4mu'] = ROOT.kViolet-9
@@ -149,9 +151,13 @@ colors['p8_ee_ZZ_ecm240'] = ROOT.kBlue-10
 colors['p8_ee_WW_ecm240'] = ROOT.kBlue-9
 
 legend = {}
-legend['dark_photons_mZd360MeV_e_1e-5']     = '360MeV, 1#times10^{-5}'
-legend['dark_photons_mZd1100MeV_e_3.12e-6'] = '1100MeV, 3.12#times10^{-6}'
-legend['dark_photons_mZd7000MeV_e_2.7e-7']  = '7000MeV, 2.7#times10^{-7}'
+legend['dark_photons_mZd360MeV_e_1e-5']     = '0.36 GeV, 1#times10^{-5}'
+legend['dark_photons_mZd1100MeV_e_3.12e-6'] = '1.1 GeV, 3.12#times10^{-6}'
+legend['dark_photons_mZd7000MeV_e_2.7e-7']  = '7 GeV, 2.7#times10^{-7}'
+legend['dark_photons_mZd10000MeV_e_6.7e-7']  = '10 GeV, 6.7#times10^{-7}'
+
+
+legend['dark_photons_mZd10000MeV_e_2.7e-7']  = '10 GeV, 2.7#times10^{-7}'
 
 legend['bkg_ee_qqH_HZZ_4l'] =            r"Z #rightarrow qq, h #rightarrow 4l self"
 legend['bkg_ee_qqH_HZZ_4mu'] =           r"Z #rightarrow qq, h #rightarrow 4mu self"
