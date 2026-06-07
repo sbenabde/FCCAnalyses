@@ -1,9 +1,9 @@
 Authors: Sarah Ben Abdesselem and Axel Gallén
 
-This folder contains all the instructions and files needed to generate long lived dark photon samples produced in the HAHM model https://github.com/davidrcurtin/HAHM.
+This folder[^1] contains all the instructions and files needed to generate long lived dark photon samples produced in the HAHM model https://github.com/davidrcurtin/HAHM.
 
 ## Setting up the FCCAnalyses environment
-The FCCAnalyses framework is the software specifically designed for FCC related analyses. It is necessary to setup the FCCAnalyses environemnt with the correct key4hep version, and stay on that same key4hep version during the entire analysis, to avoid any version mismatch between python, ROOT and the EDM4HEP output formats. 
+The FCCAnalyses framework[^2] is the software specifically designed for FCC related analyses. It is necessary to setup the FCCAnalyses environemnt with the correct key4hep version, and stay on that same key4hep version during the entire analysis, to avoid any version mismatch between python, ROOT and the EDM4HEP output formats. 
 
 > [!IMPORTANT]
 > The recommended version is the 2024-03-10 release. 
@@ -24,7 +24,7 @@ fccanalysis build -j
 
 Once the framework is setup, you'll need to download two files:
 - **MadGraph** from https://launchpad.net/mg5amcnlo
-- **The HAHM model** MadGraph extension from https://github.com/davidrcurtin/HAHM \
+- **The HAHM model** MadGraph extension from https://github.com/davidrcurtin/HAHM \ [^3] [^4]
 
 > [!NOTE]
 > We are using the v_5.3.11 version of MadGraph and the v3 version of the HAHM model extension
@@ -35,7 +35,7 @@ Import the MadGraph tarball and the HAHM model zip file to your eos space. If yo
 scp MG5_aMC_v5.3.11.tar username@lxplus.cern.ch:/path/to/your/dir
 scp HAHM_MG5model_v3.zip username@lxplus.cern.ch:/path/to/your/dir
 ```
-then, from lxplus, unzip both the tarball and the HAHM model zip file 
+(if you're working on vsc, you can just drag the folders to the right directory) then, on lxplus, unzip both the tarball and the HAHM model zip file 
 
 ```
 tar -xf MG5_aMC_v3.4.1.tar
@@ -97,3 +97,9 @@ DelphesPythia8_EDM4HEP \
 ```
 
 This .root file can now serve as input in the stage1 step of your FCCAnalysis!
+
+[^1]: This readme is inspired from https://github.com/FCC-LLP/FCCAnalyses/blob/master/examples/FCCee/bsm/LLPs/ExoticHiggsDecays/H_ss_4b_SampleGeneration/README.md
+[^2]: https://hep-fcc.github.io/FCCAnalyses/
+[^3]: "Exotic Decays of the 125 GeV Higgs Boson" by Curtin, Essig, Gori, Jaiswal, Katz, Liu, Liu, McKeen, Shelton, Strassler, Surujon, Tweedie and Zhong. (arXiv:1312.4992)
+[^4]: "Illuminating Dark Photons with High-Energy Colliders", by Curtin, Essig, Gori, Shelton (arXiv:1412.0018)
+
