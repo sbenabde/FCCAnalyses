@@ -7,11 +7,11 @@ intLumi = 10.8e+06 #in pb-1
 ###If scaleSig or scaleBack is not defined, plots will be normalized to 1
 # scaleSig       = 0.
 # scaleBack      = 0.
-ana_tex        = 'e^{+}e^{-} #rightarrow Zh, Z #rightarrow qq, h #rightarrow Z_{d} Z_{d}, Z_{d} #rightarrow #mu^{+} #mu^{-}'
+ana_tex        = "e^{+}e^{-} #rightarrow Zh, Z #rightarrow qq, h #rightarrow A' A', A' #rightarrow #mu^{+} #mu^{-}"
 delphesVersion = '3.4.2'
 energy         = 240
 collider       = 'FCC-ee'
-inputDir       = "/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/Final_output_backgrounds/three_bkgs/"
+inputDir       = "/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons/Final_output_backgrounds/"
 formats        = ['png', 'pdf']
 yaxis          = ['lin','log']
 # xaxis          = ['lin', 'log']
@@ -44,6 +44,7 @@ variables = [
             'DV1_Lxyz',
             'DV2_Lxyz',
             'DV_lxyz',
+            'DV_lxyz_short',
             'n_DVs'
 ]
 
@@ -119,10 +120,20 @@ plots['Normalize'] = {**my_samples, 'normalize': True, 'ytitle': 'Normalized to 
 
 linestyle = {}
 colors = {}
-colors['dark_photons_mZd360MeV_e_1e-5']      = ROOT.kViolet+7
-colors['dark_photons_mZd1100MeV_e_3.12e-6']  = ROOT.kMagenta+3
-colors['dark_photons_mZd7000MeV_e_2.7e-7']   = ROOT.kPink+8
-colors['dark_photons_mZd10000MeV_e_6.7e-7']  = ROOT.kPink-8
+purple = ROOT.TColor.GetColor("#B95E82")
+pink = ROOT.TColor.GetColor("#F39F9F")
+orange = ROOT.TColor.GetColor("#FFC29B")
+yellow = ROOT.TColor.GetColor("#FFECC0")
+
+green1 = ROOT.TColor.GetColor("#84B179")
+green2 = ROOT.TColor.GetColor("#A2CB8B")
+green3 = ROOT.TColor.GetColor("#C7EABB")
+
+
+colors['dark_photons_mZd360MeV_e_1e-5']      = purple
+colors['dark_photons_mZd1100MeV_e_3.12e-6']  = pink
+colors['dark_photons_mZd7000MeV_e_2.7e-7']   = orange
+colors['dark_photons_mZd10000MeV_e_6.7e-7']  = yellow
 
 colors['dark_photons_mZd10000MeV_e_2.7e-7']  = ROOT.kPink-8
 
@@ -139,7 +150,7 @@ colors['wzp6_ee_bbH_Hmumu_ecm240'] = ROOT.kOrange-8
 
 colors['wzp6_ee_mumuH_Hmumu_ecm240'] = ROOT.kRed-10
 
-colors['wzp6_ee_qqH_HZZ_llll_ecm240'] = ROOT.kViolet-9
+colors['wzp6_ee_qqH_HZZ_llll_ecm240'] = green1
 
 colors['wzp6_ee_qqH_HWW_ecm240'] = ROOT.kPink-10
 colors['wzp6_ee_ccH_HWW_ecm240'] = ROOT.kPink-9
@@ -147,8 +158,8 @@ colors['wzp6_ee_bbH_HWW_ecm240'] = ROOT.kPink-8
 
 colors['wzp6_ee_mumuH_Hbb_ecm240'] = ROOT.kGreen-10
 
-colors['p8_ee_ZZ_ecm240'] = ROOT.kBlue-10
-colors['p8_ee_WW_ecm240'] = ROOT.kBlue-9
+colors['p8_ee_ZZ_ecm240'] = green2
+colors['p8_ee_WW_ecm240'] = green3
 
 legend = {}
 legend['dark_photons_mZd360MeV_e_1e-5']     = '0.36 GeV, 1#times10^{-5}'

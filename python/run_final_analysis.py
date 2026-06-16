@@ -105,141 +105,6 @@ def save_json(results: dict[str, dict[str, Any]],
 
 
 # ------------------------------------------------------------------------------
-# def save_tables(results: dict[str, dict[str, Any]],
-#                            outpath: str,
-#                            process_dict: dict[str, Any],
-#                            cut_labels: dict[str, str] = None) -> None:
-
-#     def latex_safe(s: str) -> str:
-#         return (s.replace(">=", "$\geq$")
-#                  .replace("<=", "$\leq$")
-#                  .replace("#", "\#"))
-
-#     cut_names = list(results[next(iter(results))].keys())
-#     if not cut_names:
-#         raise ValueError("No results found")
-
-#     if cut_labels is None:
-#         cut_labels = {c: c for c in cut_names}
-
-#     cut_labels["all_events"] = "All events"
-
-
-#     signal_names = [n for n in results if "dark_photons" in n]
-#     background_names = [n for n in results if n not in signal_names]
-
-#     if len(signal_names) == 0:
-#         raise ValueError("No signal samples found")
-
-#     if len(background_names) == 0:
-#         background_names = []  # signal-only mode
-
-#     def get_bkg(cut):
-#         return sum(results[b][cut]["n_events"] for b in background_names)
-
-#     def get_bkg_unc(cut):
-#         return math.sqrt(sum(results[b][cut]["uncertainty"] ** 2 for b in background_names))
-
-
-#     with open(outpath, "w", encoding="utf-8") as outfile:
-#         outfile.write("\\begin{table}[H]\n")
-#         outfile.write("\\centering\n")
-#         outfile.write("\\resizebox{\\textwidth}{!}{\n")
-
-#         n_sig = len(signal_names)
-
-#         col_format = "|l||" + "c|" * n_sig + "c||" + "c|" * n_sig + "|"
-#         outfile.write(f"\\begin{{tabular}}{{{col_format}}} \\hline\n")
-
-#         #Header
-#         outfile.write(" & ")
-#         outfile.write(f"\\multicolumn{{{n_sig}}}{{c|}}{{\\textbf{{Signal}}}} & ")
-
-#         if background_names:
-#             outfile.write("\\textbf{Bkg} & ")
-#         else:
-#             outfile.write("\\textbf{No Bkg} & ")
-
-#         outfile.write(f"\\multicolumn{{{n_sig}}}{{c|}}{{\\textbf{{$S/\\sqrt{{S+B}}$}}}} \\\\ \\hline\n")
-
-#         #Signal labels
-#         outfile.write("\\textbf{Selection}")
-
-#         for sig in signal_names:
-#             match = re.search(r"mZd(\d+)", sig)
-#             label = f"{match.group(1)} MeV" if match else sig
-#             outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
-
-#         if background_names:
-#             outfile.write(" & \\textbf{Background}")
-#         else:
-#             outfile.write(" & -")
-
-#         for sig in signal_names:
-#             match = re.search(r"mZd(\d+)", sig)
-#             label = f"{match.group(1)} MeV" if match else sig
-#             outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
-
-#         for sig in signal_names:
-#             match = re.search(r"mZd(\d+)", sig)
-#             label = f"{match.group(1)} MeV" if match else sig
-#             outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
-
-#         outfile.write(" \\\\ \\hline \\hline\n")
-
-#         #Cross sections
-#         outfile.write("\\textbf{Cross Section [pb]}")
-#         for _ in signal_names:
-#             outfile.write(" & -")
-#         outfile.write(" & -")
-#         for _ in signal_names:
-#             outfile.write(" & -")
-#         for _ in signal_names:
-#             outfile.write(" & -")
-#         outfile.write(" \\\\ \\hline \\hline\n")
-
-#         for cut in cut_names:
-#             label = latex_safe(cut_labels.get(cut, cut))
-#             outfile.write(label)
-
-#             s_vals = []
-#             for sig in signal_names:
-#                 s = results[sig][cut]["n_events"]
-#                 u = results[sig][cut]["uncertainty"]
-
-#                 s_vals.append(s)
-#                 outfile.write(f" & {s:.2f} $\\pm$ {u:.2f}")
-
-#             if background_names:
-#                 b = get_bkg(cut)
-#                 b_u = get_bkg_unc(cut)
-#                 outfile.write(f" & {b:.2f} $\\pm$ {b_u:.2f}")
-#             else:
-#                 b = 0.0
-#                 outfile.write(" & -")
-
-#             #S/sqrt(S+B)
-#             for s in s_vals:
-#                 if (s + b) > 0:
-#                     sig = s / math.sqrt(s + b)
-#                     outfile.write(f" & {sig:.3f}")
-#                 else:
-#                     outfile.write(" & -")
-
-#             if cut in ["Preselection", "Total_Selection"]:
-#                 outfile.write(" \\\\ \\hline\n")
-#             else:
-#                 outfile.write(" \\\\\n")
-                
-#         #Footer
-#         outfile.write("\\end{tabular}\n")
-#         outfile.write("}\n")
-#         outfile.write("\\caption{Signal yields, background, $S/B$, and $S/\\sqrt{S+B}$.}\n")
-#         outfile.write("\\label{tab:final_significance_updated}\n")
-#         outfile.write("\\end{table}\n")
-
-       
-#------------------------------------------------------------------------------
 def save_tables(results: dict[str, dict[str, Any]],
                            outpath: str,
                            process_dict: dict[str, Any],
@@ -250,20 +115,14 @@ def save_tables(results: dict[str, dict[str, Any]],
                  .replace("<=", "$\\leq$")
                  .replace("#", "\\#"))
 
-    #Keep only selected cuts
-    selected_cuts = ["selNone", "Preselection", "Total_Selection"]
-    available_cuts = list(results[next(iter(results))].keys())
-    cut_names = [c for c in selected_cuts if c in available_cuts]
-
+    cut_names = list(results[next(iter(results))].keys())
     if not cut_names:
-        raise ValueError("Required cuts not found in results")
+        raise ValueError("No results found")
 
     if cut_labels is None:
-        cut_labels = {
-            "selNone":          r"Before Selection",
-            "Preselection":     r"Preselection",
-            "Total_Selection" : r"Total Selection",
-    }
+        cut_labels = {c: c for c in cut_names}
+
+    cut_labels["all_events"] = "All events"
 
     signal_names = [n for n in results if "dark_photons" in n]
     background_names = [n for n in results if n not in signal_names]
@@ -294,55 +153,208 @@ def save_tables(results: dict[str, dict[str, Any]],
         return math.sqrt(sum(results[b][cut]["uncertainty"] ** 2 for b in background_names))
 
 
-        # --- LaTeX Export ---
-    latex_header = r"""
-    \begin{longtable}[c]{|c|c|c||c|c|c|}
-    \caption{Signal yields after each respective selection cut.} \label{tab:yields_all_signal} \\
-    \hline
-    \textbf{mass [GeV]} & $\varepsilon$ & $\sigma$ [pb] & \textbf{Before selection} & \textbf{Preselection} & \textbf{Total Selection} \\ \hline
-    \endfirsthead
-    \hline
-    \textbf{mass [GeV]} & $\varepsilon$ & $\sigma$ [pb] & \textbf{Before selection} & \textbf{Preselection} & \textbf{Total Selection} \\ \hline
-    \endhead
-    """
     with open(outpath, "w", encoding="utf-8") as outfile:
-        outfile.write(latex_header)
+        outfile.write("\\begin{table}[H]\n")
+        outfile.write("\\centering\n")
+        outfile.write("\\resizebox{\\textwidth}{!}{\n")
 
-        last_mass = None
+        n_sig = len(signal_names)
 
-        #Signal rows
+        col_format = "|l||" + "c|" * n_sig + "c||" + "c|" * n_sig + "|"
+        outfile.write(f"\\begin{{tabular}}{{{col_format}}} \\hline\n")
+
+        #Header
+        outfile.write(" & ")
+        outfile.write(f"\\multicolumn{{{n_sig}}}{{c|}}{{\\textbf{{Signal}}}} & ")
+
+        if background_names:
+            outfile.write("\\textbf{Bkg} & ")
+        else:
+            outfile.write("\\textbf{No Bkg} & ")
+
+        outfile.write(f"\\multicolumn{{{n_sig}}}{{c|}}{{\\textbf{{$S/\\sqrt{{S+B}}$}}}} \\\\ \\hline\n")
+
+        #Signal labels
+        outfile.write("\\textbf{Selection}")
+
         for sig in signal_names:
-            current_mass = get_mass(sig)
-            
-            #Draw a hline between different mass groups
-            if last_mass is not None and current_mass != last_mass:
-                outfile.write(r"\hline" + "\n")
-            last_mass = current_mass
+            match = re.search(r"mZd(\d+)", sig)
+            label = f"{match.group(1)} MeV" if match else sig
+            outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
 
-            #Extract mass and epsilon string
-            match = re.search(r"mZd(\d+)MeV_e_(.*)", sig)
-            
-            xsec = process_dict[sig].get("crossSection", 0.0)
-            if match:
-                mev_val = int(match.group(1))
-                gev_val = mev_val / 1000.0
-                epsilon_raw = match.group(2)
-                epsilon_formatted = epsilon_raw.replace("e", r"\times 10^{") + "}" if "e" in epsilon_raw else epsilon_raw
-                outfile.write(f"{gev_val:g} & ${epsilon_formatted}$ & {xsec}")
-            else:
-                # Fallback
-                outfile.write(f"{sig} & -")
+        if background_names:
+            outfile.write(" & \\textbf{Background}")
+        else:
+            outfile.write(" & -")
 
-            for cut in cut_names:
+        for sig in signal_names:
+            match = re.search(r"mZd(\d+)", sig)
+            label = f"{match.group(1)} MeV" if match else sig
+            outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
+
+        for sig in signal_names:
+            match = re.search(r"mZd(\d+)", sig)
+            label = f"{match.group(1)} MeV" if match else sig
+            outfile.write(f" & \\textbf{{{latex_safe(label)}}}")
+
+        outfile.write(" \\\\ \\hline \\hline\n")
+
+        #Cross sections
+        outfile.write("\\textbf{Cross Section [pb]}")
+        for _ in signal_names:
+            outfile.write(" & -")
+        outfile.write(" & -")
+        for _ in signal_names:
+            outfile.write(" & -")
+        for _ in signal_names:
+            outfile.write(" & -")
+        outfile.write(" \\\\ \\hline \\hline\n")
+
+        for cut in cut_names:
+            label = latex_safe(cut_labels.get(cut, cut))
+            outfile.write(label)
+
+            s_vals = []
+            for sig in signal_names:
                 s = results[sig][cut]["n_events"]
                 u = results[sig][cut]["uncertainty"]
-                outfile.write(f" & {s:.2f} $\\pm$ {u:.2f}")
-                
-            outfile.write(r" \\" + "\n")
 
-        # Table Footer        
-        outfile.write(r"\hline" + "\n")
-        outfile.write(r"\end{longtable}" + "\n")
+                s_vals.append(s)
+                outfile.write(f" & {s:.2f} $\\pm$ {u:.2f}")
+
+            if background_names:
+                b = get_bkg(cut)
+                b_u = get_bkg_unc(cut)
+                outfile.write(f" & {b:.2f} $\\pm$ {b_u:.2f}")
+            else:
+                b = 0.0
+                outfile.write(" & -")
+
+            #S/sqrt(S+B)
+            for s in s_vals:
+                if (s + b) > 0:
+                    sig = s / math.sqrt(s + b)
+                    outfile.write(f" & {sig:.3f}")
+                else:
+                    outfile.write(" & -")
+
+            if cut in ["Preselection", "Total_Selection"]:
+                outfile.write(" \\\\ \\hline\n")
+            else:
+                outfile.write(" \\\\\n")
+                
+        #Footer
+        outfile.write("\\end{tabular}\n")
+        outfile.write("}\n")
+        outfile.write("\\caption{Signal yields, background, $S/B$, and $S/\\sqrt{S+B}$.}\n")
+        outfile.write("\\label{tab:final_significance_updated}\n")
+        outfile.write("\\end{table}\n")
+
+       
+# #------------------------------------------------------------------------------
+# def save_tables(results: dict[str, dict[str, Any]],
+#                            outpath: str,
+#                            process_dict: dict[str, Any],
+#                            cut_labels: dict[str, str] = None) -> None:
+
+#     def latex_safe(s: str) -> str:
+#         return (s.replace(">=", "$\\geq$")
+#                  .replace("<=", "$\\leq$")
+#                  .replace("#", "\\#"))
+
+#     #Keep only selected cuts
+#     selected_cuts = ["selNone", "Preselection", "Total_Selection"]
+#     available_cuts = list(results[next(iter(results))].keys())
+#     cut_names = [c for c in selected_cuts if c in available_cuts]
+
+#     if not cut_names:
+#         raise ValueError("Required cuts not found in results")
+
+#     if cut_labels is None:
+#         cut_labels = {
+#             "selNone":          r"Before Selection",
+#             "Preselection":     r"Preselection",
+#             "Total_Selection" : r"Total Selection",
+#     }
+
+#     signal_names = [n for n in results if "dark_photons" in n]
+#     background_names = [n for n in results if n not in signal_names]
+
+#     if len(signal_names) == 0:
+#         raise ValueError("No signal samples found")
+
+#     def get_mass(name: str) -> float:
+#         match = re.search(r"mZd(\d+)MeV", name)
+#         return float(match.group(1)) if match else 0.0
+
+#     def get_epsilon(name: str) -> float:
+#             match = re.search(r"_e_(.*)", name)
+#             try:
+#                 return float(match.group(1)) if match else 0.0
+#             except ValueError:
+#                 return 0.0
+
+#     signal_names.sort(key=lambda n: (get_mass(n), get_epsilon(n)))
+    
+#     if len(background_names) == 0:
+#         background_names = []
+
+#     def get_bkg(cut):
+#         return sum(results[b][cut]["n_events"] for b in background_names)
+
+#     def get_bkg_unc(cut):
+#         return math.sqrt(sum(results[b][cut]["uncertainty"] ** 2 for b in background_names))
+
+
+#         # --- LaTeX Export ---
+#     latex_header = r"""
+#     \begin{longtable}[c]{|c|c|c||c|c|c|}
+#     \caption{Signal yields after each respective selection cut.} \label{tab:yields_all_signal} \\
+#     \hline
+#     \textbf{mass [GeV]} & $\varepsilon$ & $\sigma$ [pb] & \textbf{Before selection} & \textbf{Preselection} & \textbf{Total Selection} \\ \hline
+#     \endfirsthead
+#     \hline
+#     \textbf{mass [GeV]} & $\varepsilon$ & $\sigma$ [pb] & \textbf{Before selection} & \textbf{Preselection} & \textbf{Total Selection} \\ \hline
+#     \endhead
+#     """
+#     with open(outpath, "w", encoding="utf-8") as outfile:
+#         outfile.write(latex_header)
+
+#         last_mass = None
+
+#         #Signal rows
+#         for sig in signal_names:
+#             current_mass = get_mass(sig)
+            
+#             #Draw a hline between different mass groups
+#             if last_mass is not None and current_mass != last_mass:
+#                 outfile.write(r"\hline" + "\n")
+#             last_mass = current_mass
+
+#             #Extract mass and epsilon string
+#             match = re.search(r"mZd(\d+)MeV_e_(.*)", sig)
+            
+#             xsec = process_dict[sig].get("crossSection", 0.0)
+#             if match:
+#                 mev_val = int(match.group(1))
+#                 gev_val = mev_val / 1000.0
+#                 epsilon_raw = match.group(2)
+#                 epsilon_formatted = epsilon_raw.replace("e", r"\times 10^{") + "}" if "e" in epsilon_raw else epsilon_raw
+#                 outfile.write(f"{gev_val:g} & ${epsilon_formatted}$ & {xsec}")
+#             else:
+#                 # Fallback
+#                 outfile.write(f"{sig} & -")
+
+#             for cut in cut_names:
+#                 s = results[sig][cut]["n_events"]
+#                 u = results[sig][cut]["uncertainty"]
+#                 outfile.write(f" & {s:.2f} $\\pm$ {u:.2f}")
+                
+#             outfile.write(r" \\" + "\n")
+
+#         # Table Footer        
+#         outfile.write(r"\hline" + "\n")
+#         outfile.write(r"\end{longtable}" + "\n")
 #----------------------------------------------------------------------------------------
 
 def run(rdf_module, args) -> None:
@@ -526,10 +538,13 @@ def run(rdf_module, args) -> None:
                 xsec = process_dict[process_name]["crossSection"]
                 br_sf = process_dict[process_name].get("scaleFactor", 1.0)
                 br_sfH = process_dict[process_name].get("scaleFactorHiggs", 1.0)
+                BR = process_dict[process_name].get("BR", 1.0)
             except KeyError:
                 xsec = 1.0
                 br_sf = 1.0
-                br_sfH = 1.0                
+                br_sfH = 1.0   
+                BR = 1.0
+
                 LOGGER.warning('Cross-section value not found for process '
                                '"%s"!\nUsing 1.0...', process_name)
 
@@ -633,11 +648,15 @@ def run(rdf_module, args) -> None:
         if do_scale:
             LOGGER.info('Scaling cut yields...')
             all_events = all_events_raw * 1. * gen_sf * int_lumi / process_events[process_name]
-            uncertainty = ROOT.Math.sqrt(all_events_raw) * gen_sf * \
-                int_lumi / process_events[process_name]
+            #all_events = all_events_raw * 1. * 2.2*10**6 * 69.91*10**(-2) * 10**(-3) * BR**2 / process_events[process_name]
+            uncertainty = ROOT.Math.sqrt(all_events_raw) * gen_sf * int_lumi / process_events[process_name]
+            #uncertainty = ROOT.Math.sqrt(all_events_raw) * 2.2*10**6 * 69.91*10**(-2) * 10**(-3) * BR**2 / process_events[process_name]
+
         else:
             all_events = all_events_raw
             uncertainty = ROOT.Math.sqrt(all_events_raw)
+
+
 
         results[process_name]['all_events'] = {}
         results[process_name]['all_events']['n_events_raw'] = all_events_raw
@@ -648,15 +667,13 @@ def run(rdf_module, args) -> None:
             cut_result = {}
             cut_result['n_events_raw'] = count_list[i].GetValue()
             if do_scale:
-                cut_result['n_events'] = \
-                    cut_result['n_events_raw'] * 1. * gen_sf * int_lumi / process_events[process_name]
-                cut_result['uncertainty'] = \
-                    math.sqrt(cut_result['n_events_raw']) * gen_sf  * \
-                    int_lumi / process_events[process_name]
+                cut_result['n_events'] = cut_result['n_events_raw'] * 1. * gen_sf * int_lumi / process_events[process_name]
+                #cut_result['n_events'] = cut_result['n_events_raw'] * 2.2*10**6 * 69.91*10**(-2) * 10**(-3) * BR**2 / process_events[process_name]
+                cut_result['uncertainty'] = math.sqrt(cut_result['n_events_raw']) * gen_sf  * int_lumi / process_events[process_name]
+                #cut_result['uncertainty'] = math.sqrt(cut_result['n_events_raw']) * 2.2*10**6 * 69.91*10**(-2) * 10**(-3) * BR**2 / process_events[process_name]
             else:
                 cut_result['n_events'] = cut_result['n_events_raw']
-                cut_result['uncertainty'] = \
-                    math.sqrt(cut_result['n_events_raw'])
+                cut_result['uncertainty'] = math.sqrt(cut_result['n_events_raw'])
             results[process_name][cut] = cut_result
 
         # Cut name width
@@ -695,8 +712,8 @@ def run(rdf_module, args) -> None:
                     hist_name = hist.GetName() + '_raw'
                     outfile.WriteObject(hist.GetValue(), hist_name)
                     if do_scale:
-                        hist.Scale(gen_sf * int_lumi  /
-                                   process_events[process_name])
+                        hist.Scale(gen_sf * int_lumi / process_events[process_name])
+                        #hist.Scale(2.2*10**6 * 69.91*10**(-2) * 10**(-3) * BR**2 / process_events[process_name])
                     outfile.WriteObject(hist.GetValue(), hist.GetName())
 
                 # write all metadata info to the output file
@@ -720,6 +737,9 @@ def run(rdf_module, args) -> None:
                     outfile.WriteObject(param, param.GetName())
                     
                     param = ROOT.TParameter(float)("scaleFactor", br_sf)
+                    outfile.WriteObject(param, param.GetName())
+                    
+                    param = ROOT.TParameter(float)("BR", BR)
                     outfile.WriteObject(param, param.GetName())
                     
                     param = ROOT.TParameter(float)("scaleFactorHiggs", br_sfH)

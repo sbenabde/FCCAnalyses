@@ -874,7 +874,7 @@ def draw_plot(config: dict[str, Any],
     #Selection (cuts)
     text = '#bf{#it{' + extralab + '}}'
     latex.SetTextSize(0.025)
-    #latex.DrawLatex(0.155, 0.75, text)
+    latex.DrawLatex(0.155, 0.75, text)
 
     if config['scale_sig'] != 1.0:
         text = '#bf{#it{Signal Scaling = ' + f'{config["scale_sig"]:.3g}' + \
@@ -927,7 +927,7 @@ def draw_plot(config: dict[str, Any],
         latex.SetNDC(ROOT.kTRUE)
         text = '#bf{#it{' + extralab + '}}'
         latex.SetTextSize(0.025)
-        #latex.DrawLatex(0.155, 0.75, text)
+        latex.DrawLatex(0.155, 0.75, text)
 
         text = '#bf{#it{Signal Scaling = ' + f'{config["scale_sig"]:.3g}' + \
                '}}'

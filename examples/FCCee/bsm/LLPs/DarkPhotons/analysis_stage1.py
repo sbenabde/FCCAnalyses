@@ -93,10 +93,10 @@ class Analysis():
     def __init__(self, cmdline_args):
 
         self.process_list = {
-        #Signal
-        'dark_photons_mZd4800MeV_e_8.7e-7': {},
-        'dark_photons_mZd5400MeV_e_4.7e-7': {},
-}
+            'dark_photons_mZd360MeV_e_1e-5':{},
+            'dark_photons_mZd1100MeV_e_3.12e-6':{},
+            'dark_photons_mZd7000MeV_e_2.7e-7':{},
+        }
   
         # self.input_dir = '/eos/experiment/fcc/ee/analyses_storage/BSM/LLPs/DarkPhotons'
         self.input_dir = '/eos/user/s/sbenabde/MG5_aMC_v3_5_11/Root_files_HAHM_New'
